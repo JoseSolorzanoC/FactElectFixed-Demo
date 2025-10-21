@@ -1,0 +1,9 @@
+@FactElectFixed.Api_HostAddress = http://localhost:5002
+
+< {%
+    request.variables.set("FactElectFixed", "")
+%}
+GET {{FactElectFixed.Api_HostAddress}}
+Accept: application/json
+
+###

@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+<!--        <PackageReference Include="EFCore.NamingConventions" />-->
+        <PackageReference Include="FastEndpoints" />
+        <PackageReference Include="FastEndpoints.Swagger" />
+        <PackageReference Include="Infoware.SRI.DocumentosElectronicos" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+<!--        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">-->
+<!--            <PrivateAssets>all</PrivateAssets>-->
+<!--            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+<!--        </PackageReference>-->
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" />
+<!--        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />-->
+<!--        <PackageReference Include="Npgsql.OpenTelemetry" />-->
+        <PackageReference Include="OpenTelemetry.Api" />
+        <PackageReference Include="OpenTelemetry.Exporter.Console" />
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+        <PackageReference Include="ServiceScan.SourceGenerator">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ZiggyCreatures.FusionCache" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Files\1207245927001\DocumentosAutorizados\" />
+    </ItemGroup>
+
+</Project>
