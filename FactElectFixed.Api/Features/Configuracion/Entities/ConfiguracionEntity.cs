@@ -6,6 +6,6 @@ namespace FactElectFixed.Api.Features.Configuracion.Entities;
 public class ConfiguracionEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string RucEmpresa  { get; set; }
+    public string RucEmpresa { get; set; }
     public string Password { get; set; }
 }

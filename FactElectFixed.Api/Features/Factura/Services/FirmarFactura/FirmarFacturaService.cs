@@ -22,7 +22,9 @@ namespace FactElectFixed.Api.Features.Factura.Services.FirmarFactura;
 public class FirmarFacturaService(
     ISRIWebService sriWebService,
     IWebHostEnvironment webHostEnvironment,
-    ICachedXmlFileService cachedXmlFileService, ApplicationDbContext dbContext, IFusionCache cache)
+    ICachedXmlFileService cachedXmlFileService,
+    ApplicationDbContext dbContext,
+    IFusionCache cache)
     : IFirmarFacturaService
 {
     private ISRIWebService _sriWebService = sriWebService;
@@ -53,7 +55,7 @@ public class FirmarFacturaService(
                     }
                 };
             }
-            
+
             XmlDocument xmlFactura = tuplaSerializacion.Item1;
 
             string? claveAcceso = xmlFactura.SelectSingleNode("//claveAcceso")?.InnerText.Trim();
@@ -226,7 +228,7 @@ public class FirmarFacturaService(
         {
             XmlDocument facturaFirmadaXml =
                 await FirmarXml(facturaXmlModel.ToXmlDocument(), facturaXmlModel.InfoTributaria.Ruc);
-            
+
             comprobantesElement.Add(new XElement("comprobante",
                 new XCData(facturaFirmadaXml.OuterXml)));
 
@@ -242,7 +244,8 @@ public class FirmarFacturaService(
 
         var documentoLote = new XDocument(new XDeclaration("1.0", "UTF-8", null), lote);
 
-        return new Tuple<XmlDocument, string?>(documentoLote.ToXmlDocument(), BuscarXmlPorClaveDeAcceso(claveAccesoPrimerComprobante!)) ;
+        return new Tuple<XmlDocument, string?>(documentoLote.ToXmlDocument(),
+            BuscarXmlPorClaveDeAcceso(claveAccesoPrimerComprobante!));
     }
 
     private async Task<XmlDocument> FirmarXml(XmlDocument xmlFactura, string ruc)
@@ -253,7 +256,7 @@ public class FirmarFacturaService(
         {
             ConfiguracionEntity certificadoInfo = await ObtenerConfiguracionEmpresa(ruc);
             string? rutaCertificado = BuscarCertificadoPorRuc(ruc);
-            
+
             if (rutaCertificado is null)
             {
                 throw new Exception("No se pudo encontrar un certificado asociado al RUC de la empresa");
@@ -315,6 +318,7 @@ public class FirmarFacturaService(
 
     private async Task<ConfiguracionEntity> ObtenerConfiguracionEmpresa(string ruc, CancellationToken ct = default)
     {
-        return await cache.GetOrSetAsync<ConfiguracionEntity>(ruc, _ => dbContext.Configuraciones.FirstOrDefaultAsync(ct)!, token: ct, duration: TimeSpan.FromHours(8));
+        return await cache.GetOrSetAsync<ConfiguracionEntity>(ruc,
+            _ => dbContext.Configuraciones.FirstOrDefaultAsync(ct)!, token: ct, duration: TimeSpan.FromHours(8));
     }
 }

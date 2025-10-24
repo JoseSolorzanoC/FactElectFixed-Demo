@@ -29,7 +29,7 @@ public static class FirmarFacturaMapper
                         {
                             Codigo = int.Parse(f.InfoTributaria.Estab),
                             Emisor = new Emisor
-                                { RUC = f.InfoTributaria.Ruc, EnumTipoAmbiente =  tipoAmbiente}
+                                { RUC = f.InfoTributaria.Ruc, EnumTipoAmbiente = tipoAmbiente }
                         }
                     }, long.Parse(f.InfoTributaria.Secuencial), EnumTipoEmision.Normal),
 #pragma warning restore CA1305

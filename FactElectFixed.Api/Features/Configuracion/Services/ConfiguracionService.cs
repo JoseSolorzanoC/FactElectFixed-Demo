@@ -1,6 +1,7 @@
 ﻿using FactElectFixed.Api.Database;
 using FactElectFixed.Api.Features.Configuracion.Entities;
 using Infoware.SRI.Firmar;
+using Microsoft.EntityFrameworkCore;
 using NuGet.ProjectModel;
 
 namespace FactElectFixed.Api.Features.Configuracion.Services;
@@ -16,11 +17,11 @@ public class ConfiguracionService(
     public async Task<ConfiguracionEntity> SaveConfiguracion(string ruc, string password, IFormFile archivoP12,
         CancellationToken ct = default)
     {
-        if (dbContext.Configuraciones.Any(c => c.RucEmpresa == ruc))
+        if (await dbContext.Configuraciones.AnyAsync(c => c.RucEmpresa == ruc, ct))
         {
             throw new ApplicationException("Ya existe una configuracion asociada al RUC ingresado.");
         }
-        
+
         byte[] fileBytes = await ConvertToBytes(archivoP12);
         VerificarPasswordP12(password, fileBytes);
 
@@ -37,9 +38,20 @@ public class ConfiguracionService(
         return configuracion;
     }
 
-    public Task<ConfiguracionEntity> UpdateConfiguracion(string ruc, string password, IFormFile archivoP12)
+    public async Task<ConfiguracionEntity> UpdateConfiguracion(string ruc, string password, IFormFile archivoP12,
+        CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        if (!await dbContext.Configuraciones.AnyAsync(c => c.RucEmpresa == ruc, ct))
+        {
+            throw new ApplicationException("No existe una configuracion registrada con el RUC ingresado.");
+        }
+
+        byte[] fileBytes = await ConvertToBytes(archivoP12);
+        VerificarPasswordP12(password, fileBytes);
+
+        await GuardarArchivoP12(ruc, archivoP12, ct);
+
+        return await ActualizarConfiguracionPasswordDb(ruc, password, ct);
     }
 
     private async Task<byte[]> ConvertToBytes(IFormFile file)
@@ -118,5 +130,17 @@ public class ConfiguracionService(
         await dbContext.Configuraciones.AddAsync(configuracion, ct);
 
         await dbContext.SaveChangesAsync(ct);
+    }
+
+    private async Task<ConfiguracionEntity> ActualizarConfiguracionPasswordDb(string ruc, string password,
+        CancellationToken ct = default)
+    {
+        ConfiguracionEntity configuracion =
+            await dbContext.Configuraciones.FirstOrDefaultAsync(c => c.RucEmpresa == ruc, ct);
+
+        configuracion!.Password = password;
+        await dbContext.SaveChangesAsync(ct);
+
+        return configuracion;
     }
 }

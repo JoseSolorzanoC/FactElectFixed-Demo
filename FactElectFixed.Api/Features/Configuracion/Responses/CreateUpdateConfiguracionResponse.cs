@@ -1,6 +1,6 @@
 ﻿namespace FactElectFixed.Api.Features.Configuracion.Responses;
 
-public class AgregarConfiguracionResponse
+public class CreateUpdateConfiguracionResponse
 {
     public bool Success { get; set; }
     public string Respuesta { get; set; }

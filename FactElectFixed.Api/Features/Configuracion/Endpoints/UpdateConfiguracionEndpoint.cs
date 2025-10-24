@@ -3,16 +3,16 @@ using FactElectFixed.Api.Features.Configuracion.Responses;
 using FactElectFixed.Api.Features.Configuracion.Services;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using ConfiguracionEntity = FactElectFixed.Api.Features.Configuracion.Responses.ConfiguracionEntity;
+using ConfiguracionEntity = FactElectFixed.Api.Features.Configuracion.Entities.ConfiguracionEntity;
 
 namespace FactElectFixed.Api.Features.Configuracion.Endpoints;
 
-public class AgregarConfiguracionEndpoint(IConfiguracionService configuracionService)
+public class UpdateConfiguracionEndpoint(IConfiguracionService configuracionService)
     : Endpoint<CreateUpdateConfiguracionRequest, Results<Ok<CreateUpdateConfiguracionResponse>, ProblemDetails>>
 {
     public override void Configure()
     {
-        Post("/api/configuracion/provisionar");
+        Patch("/api/configuracion/password/actualizar");
         AllowAnonymous();
         AllowFileUploads();
     }
@@ -23,14 +23,14 @@ public class AgregarConfiguracionEndpoint(IConfiguracionService configuracionSer
     {
         try
         {
-            Entities.ConfiguracionEntity entity =
-                await configuracionService.SaveConfiguracion(req.RucEmpresa, req.Password, req.ArchivoFirmaP12, ct);
+            ConfiguracionEntity entity =
+                await configuracionService.UpdateConfiguracion(req.RucEmpresa, req.Password, req.ArchivoFirmaP12, ct);
 
             return TypedResults.Ok(new CreateUpdateConfiguracionResponse
             {
                 Success = true,
-                Respuesta = "Configuracion Agregada Correctamente",
-                Configuracion = new ConfiguracionEntity(entity.Id, entity.RucEmpresa, entity.Password)
+                Respuesta = "Configuracion Actualizada Correctamente",
+                Configuracion = new Responses.ConfiguracionEntity(entity.Id, entity.RucEmpresa, entity.Password)
             });
         }
         catch (Exception e)

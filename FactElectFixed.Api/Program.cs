@@ -62,7 +62,8 @@ builder.Services.AddTransient<IFirmarFacturaService, FirmarFacturaService>();
 builder.Services.AddTransient<IConfiguracionService, ConfiguracionService>();
 builder.Services.AddSingleton<ICachedXmlFileService, CachedXmlFileService>();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 WebApplication app = builder.Build();
 
