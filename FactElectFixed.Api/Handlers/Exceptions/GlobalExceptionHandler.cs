@@ -5,7 +5,7 @@ namespace FactElectFixed.Api.Handlers.Exceptions;
 
 public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
-     public async ValueTask<bool> TryHandleAsync(
+    public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)

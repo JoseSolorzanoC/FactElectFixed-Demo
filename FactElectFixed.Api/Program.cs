@@ -1,13 +1,17 @@
 using System.Diagnostics;
-using FactElectFixed.Api.Features.Factura.Firma.Services.FirmarFactura;
-using FactElectFixed.Api.Helpers;
+using System.Text.Json.Serialization;
+using FactElectFixed.Api.Database;
+using FactElectFixed.Api.Features.Configuracion.Services;
+using FactElectFixed.Api.Features.Factura.Services.FirmarFactura;
 using FactElectFixed.Api.Middlewares;
 using FactElectFixed.Api.Services;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Infoware.SRI.DocumentosElectronicos.Configuracion;
+using Infoware.SRI.Firmar;
 using Infoware.SRI.WebService;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -50,13 +54,24 @@ builder.Services.AddOptions<SRIDocumentosElectronicosOptions>()
     .ValidateOnStart();
 
 builder.Services.AddHttpClient<ISRIWebService, SRIWebService>();
+builder.Services.AddSingleton<ICertificadoService, CertificadoService>();
 
 builder.Services.AddFusionCache();
 
 builder.Services.AddTransient<IFirmarFacturaService, FirmarFacturaService>();
+builder.Services.AddTransient<IConfiguracionService, ConfiguracionService>();
 builder.Services.AddSingleton<ICachedXmlFileService, CachedXmlFileService>();
 
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 WebApplication app = builder.Build();
+
+app.UseFastEndpoints(config =>
+{
+    config.Validation.EnableDataAnnotationsSupport = true;
+    config.Errors.UseProblemDetails();
+    config.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
+}).UseSwaggerGen();
 
 app.UseMiddleware<IpWhitelistMiddleware>();
 
@@ -65,10 +80,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseExceptionHandler();
+
 app.UseStatusCodePages();
 
 app.UseHttpsRedirection();
-
-app.UseFastEndpoints().UseSwaggerGen();
 
 await app.RunAsync();

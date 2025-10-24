@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using ZiggyCreatures.Caching.Fusion;
+﻿using ZiggyCreatures.Caching.Fusion;
 
 namespace FactElectFixed.Api.Services;
 

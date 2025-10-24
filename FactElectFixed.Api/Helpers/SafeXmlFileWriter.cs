@@ -12,7 +12,7 @@ public static class SafeXmlFileWriter
 
         string tempFile = path + ".tmp";
 
-        lock (_fileLock) 
+        lock (_fileLock)
         {
             using (var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None))
             using (var writer = new StreamWriter(fs, Encoding.UTF8))
@@ -20,7 +20,7 @@ public static class SafeXmlFileWriter
                 writer.Write(xmlContent);
             }
 
-            File.Copy(tempFile, path, overwrite: true);
+            File.Copy(tempFile, path, true);
 
             File.Delete(tempFile);
         }
