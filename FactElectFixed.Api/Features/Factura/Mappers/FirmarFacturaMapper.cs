@@ -1,21 +1,28 @@
 ﻿using System.Xml;
 using System.Xml.Linq;
 using FactElectFixed.Api.Features.Factura.Xml;
+using Infoware.Core.Extensions;
 using Infoware.SRI.Core.Enumerados;
 using Infoware.SRI.Modelos;
+using Infoware.SRI.Modelos.Enumerados;
 using Infoware.SRI.XSDs;
 
 namespace FactElectFixed.Api.Features.Factura.Mappers;
 
 public static class FirmarFacturaMapper
 {
-    public static FacturaXmlModel ToXml(this Requests.Factura f, EnumTipoAmbiente tipoAmbiente)
+    public static FacturaXmlModel ToXml(this Requests.Factura f, EnumTipoAmbiente tipoAmbiente, string version)
     {
         return new FacturaXmlModel
         {
+            Version = version,
             InfoTributaria = new InfoTributaria
             {
-                Ambiente = f.InfoTributaria.Ambiente,
+#pragma warning disable CA1305
+#pragma warning disable S6562
+                Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(validInDate: new DateTime())),
+#pragma warning restore S6562
+#pragma warning restore CA1305
                 TipoEmision = f.InfoTributaria.TipoEmision,
                 RazonSocial = f.InfoTributaria.RazonSocial,
                 NombreComercial = f.InfoTributaria.NombreComercial,

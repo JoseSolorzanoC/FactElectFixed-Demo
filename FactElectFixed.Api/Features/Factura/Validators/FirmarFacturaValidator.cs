@@ -26,10 +26,6 @@ public class InfoTributariaValidator : Validator<InfoTributaria>
 {
     public InfoTributariaValidator()
     {
-        RuleFor(x => x.Ambiente)
-            .NotEmpty().WithMessage("El campo 'Ambiente' es obligatorio.")
-            .InclusiveBetween(1, 2).WithMessage("El campo 'Ambiente' debe estar entre 1 y 2.");
-
         RuleFor(x => x.TipoEmision)
             .NotEmpty().WithMessage("El campo 'TipoEmision' es obligatorio.")
             .Equal(1).WithMessage("El campo 'TipoEmision' debe ser igual a 1.");
@@ -225,6 +221,7 @@ public class DetalleValidator : Validator<Detalle>
             .MaximumLength(25).WithMessage("El campo 'CodigoPrincipal' no puede tener más de 25 caracteres.");
 
         RuleFor(x => x.CodigoAuxiliar)
+            .MinimumLength(1)
             .MaximumLength(25)
             .WithMessage("El campo 'CodigoAuxiliar' no puede tener más de 25 caracteres.")
             .When(x => !string.IsNullOrWhiteSpace(x.CodigoAuxiliar));

@@ -15,7 +15,7 @@ public class ComprobanteResponse
     public string? EstadoRecepcion { get; set; }
     public List<ErrorMensajeSri>? ErroresRecepcion { get; set; }
     public List<ErrorMensajeSri>? ErroresAutorizacion { get; set; }
-    public string XmlProcesado { get; set; }
+    public List<ComprobanteExtraido> XmlProcesados { get; set; }
 }
 
 public class ErrorMensajeSri
@@ -25,4 +25,10 @@ public class ErrorMensajeSri
     public string? ClaveAcceso { get; set; }
     public string Codigo { get; set; }
     public string Mensaje { get; set; }
+}
+
+public class ComprobanteExtraido
+{
+    public string ClaveAcceso { get; set; } = string.Empty;
+    public string XmlCData { get; set; } = string.Empty;
 }

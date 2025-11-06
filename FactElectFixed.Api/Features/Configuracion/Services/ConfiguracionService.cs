@@ -3,13 +3,15 @@ using FactElectFixed.Api.Features.Configuracion.Entities;
 using Infoware.SRI.Firmar;
 using Microsoft.EntityFrameworkCore;
 using NuGet.ProjectModel;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace FactElectFixed.Api.Features.Configuracion.Services;
 
 public class ConfiguracionService(
     ApplicationDbContext dbContext,
     ICertificadoService certificadoService,
-    IWebHostEnvironment webHostEnvironment)
+    IWebHostEnvironment webHostEnvironment,
+    IFusionCache fusionCache)
     : IConfiguracionService
 {
     private static readonly Lock FileLock = new();
@@ -130,6 +132,8 @@ public class ConfiguracionService(
         await dbContext.Configuraciones.AddAsync(configuracion, ct);
 
         await dbContext.SaveChangesAsync(ct);
+        
+        await fusionCache.RemoveAsync(configuracion.RucEmpresa, token: ct);
     }
 
     private async Task<ConfiguracionEntity> ActualizarConfiguracionPasswordDb(string ruc, string password,
@@ -140,6 +144,8 @@ public class ConfiguracionService(
 
         configuracion!.Password = password;
         await dbContext.SaveChangesAsync(ct);
+
+        await fusionCache.RemoveAsync(ruc, token: ct);
 
         return configuracion;
     }

@@ -20,7 +20,6 @@ public class Factura
 
 public class InfoTributaria
 {
-    public int Ambiente { get; set; }
     public int TipoEmision { get; set; }
     public string RazonSocial { get; set; }
     public string NombreComercial { get; set; }
