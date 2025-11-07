@@ -323,7 +323,7 @@ public class FirmarFacturaService(
     private async Task<ConfiguracionEntity> ObtenerConfiguracionEmpresa(string ruc, CancellationToken ct = default)
     {
         return await cache.GetOrSetAsync<ConfiguracionEntity>(ruc,
-            _ => dbContext.Configuraciones.FirstOrDefaultAsync(ct)!, token: ct, duration: TimeSpan.FromHours(8));
+            _ => dbContext.Configuraciones.FirstOrDefaultAsync(config => config.RucEmpresa == ruc, ct)!, token: ct, duration: TimeSpan.FromHours(8));
     }
 
     private static List<ComprobanteExtraido> ExtraerComprobantesDesdeLote(string xmlLote)
