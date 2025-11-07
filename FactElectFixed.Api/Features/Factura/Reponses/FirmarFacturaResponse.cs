@@ -4,7 +4,7 @@ public class FirmarFacturaResponse
 {
     public bool Success { get; set; }
     public string? ClaveAcceso { get; set; }
-    public ComprobanteResponse Comprobante { get; set; }
+    public List<ComprobanteResponse> Comprobantes { get; set; }
 }
 
 public class ComprobanteResponse
@@ -15,14 +15,11 @@ public class ComprobanteResponse
     public string? EstadoRecepcion { get; set; }
     public List<ErrorMensajeSri>? ErroresRecepcion { get; set; }
     public List<ErrorMensajeSri>? ErroresAutorizacion { get; set; }
-    public List<ComprobanteExtraido> XmlProcesados { get; set; }
+    public string? XmlProcesado { get; set; }
 }
 
 public class ErrorMensajeSri
 {
-    public int IndiceComprobante { get; set; }
-    public string XmlProcesado { get; set; }
-    public string? ClaveAcceso { get; set; }
     public string Codigo { get; set; }
     public string Mensaje { get; set; }
 }

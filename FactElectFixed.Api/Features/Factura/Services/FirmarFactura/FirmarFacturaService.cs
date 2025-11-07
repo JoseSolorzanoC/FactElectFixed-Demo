@@ -33,94 +33,121 @@ public class FirmarFacturaService(
     {
         try
         {
+            int indiceComprobante = 0;
+
             _sriWebService = _sriWebService.Using(firmarFacturaRequest.Ambiente, EnumTipoEsquema.Offline);
-            Tuple<XmlDocument, string?> tuplaSerializacion = await SerializarXml(firmarFacturaRequest);
+            XmlDocument tuplaSerializacion = await SerializarXml(firmarFacturaRequest);
 
-            string? rutaXmlExistente = tuplaSerializacion.Item2;
+            XmlDocument xmlFactura = tuplaSerializacion;
 
-            if (rutaXmlExistente is not null)
+            var comprobantesAutorizados = new List<ComprobanteResponse>();
+
+            foreach (Requests.Factura unused in firmarFacturaRequest.Comprobantes)
             {
-                string claveAccesoExistente = rutaXmlExistente.Split("_")[3];
-                return new FirmarFacturaResponse
-                {
-                    Success = true,
-                    ClaveAcceso = claveAccesoExistente,
-                    Comprobante = new ComprobanteResponse
-                    {
-                        ClaveAcceso = claveAccesoExistente,
-                        EstadoAutorizacion = "AUTORIZADO",
-                        EstadoRecepcion = "RECIBIDO",
-                        Success = true,
-                        XmlProcesados = ExtraerComprobantesDesdeLote(cachedXmlFileService.GetXml(rutaXmlExistente))
-                    }
-                };
-            }
+                string claveAccesoComprobanteExistente =
+                    xmlFactura.SelectNodes("//comprobantes/comprobante")?[indiceComprobante]
+                        ?.SelectSingleNode("//claveAcceso")!.InnerText.Trim()!;
 
-            XmlDocument xmlFactura = tuplaSerializacion.Item1;
+                string? rutaXmlExistente = BuscarXmlPorClaveDeAcceso(claveAccesoComprobanteExistente);
+
+                if (rutaXmlExistente is not null)
+                {
+                    comprobantesAutorizados.Add(new ComprobanteResponse
+                    {
+                        Success = true,
+                        XmlProcesado = cachedXmlFileService.GetXml(rutaXmlExistente),
+                        ClaveAcceso = claveAccesoComprobanteExistente,
+                        EstadoRecepcion = "RECIBIDA",
+                        EstadoAutorizacion = "AUTORIZADA",
+                    });
+                }
+
+                indiceComprobante++;
+            }
 
             string? claveAcceso = xmlFactura.SelectSingleNode("//claveAcceso")?.InnerText.Trim();
 
             Response<ValidarComprobanteResponse.RespuestaRecepcionComprobante> respuesta =
                 await _sriWebService.ValidarComprobanteAsync(xmlFactura);
 
-            if (respuesta is { Ok: false, Data.Comprobantes.Comprobante: not null })
+            indiceComprobante = 0;
+
+            if (respuesta is { Data.Comprobantes.Comprobante: not null })
             {
                 var mensajesSri = new List<ErrorMensajeSri>();
-                int indiceComprobante = 0;
 
-                foreach (ValidarComprobanteResponse.Comprobante errorSriComprobante in respuesta.Data.Comprobantes
+                foreach (ValidarComprobanteResponse.Comprobante comprobanteSri in respuesta.Data.Comprobantes
                              .Comprobante)
                 {
-                    if (errorSriComprobante is { Mensajes.Mensaje: not null })
-                    {
-                        string factura = xmlFactura.SelectNodes("//comprobantes/comprobante")?[indiceComprobante]
-                            ?.InnerText.Trim();
+                    string factura = xmlFactura.SelectNodes("//comprobantes/comprobante")?[indiceComprobante]
+                        ?.InnerText.Trim();
 
-                        mensajesSri.AddRange(errorSriComprobante.Mensajes.Mensaje.Select(m => new ErrorMensajeSri
+                    ComprobanteResponse comprobante = new()
+                    {
+                        ClaveAcceso = comprobanteSri.ClaveAcceso,
+                        EstadoRecepcion = respuesta.Data.Estado,
+                        XmlProcesado = factura,
+                        Success = true
+                    };
+
+                    if (!respuesta.Ok && comprobanteSri is { Mensajes.Mensaje: not null })
+                    {
+                        mensajesSri.AddRange(comprobanteSri.Mensajes.Mensaje.Select(m => new ErrorMensajeSri
                         {
-                            IndiceComprobante = indiceComprobante,
-                            ClaveAcceso = errorSriComprobante.ClaveAcceso,
                             Mensaje = $"{m.Mensaje_} - {m.InformacionAdicional}",
-                            XmlProcesado = factura ?? "NO DEFINIDO",
                             Codigo = $"[{m.Tipo}][{m.Identificador}]"
                         }));
                     }
 
+                    if (mensajesSri.Any())
+                    {
+                        comprobante.Success = false;
+                        comprobante.ErroresAutorizacion = mensajesSri;
+                    }
+
+                    comprobantesAutorizados.Add(comprobante);
                     indiceComprobante++;
                 }
 
-                return new FirmarFacturaResponse
-                {
-                    Success = false,
-                    ClaveAcceso = claveAcceso,
-                    Comprobante = new ComprobanteResponse
-                    {
-                        ErroresRecepcion = mensajesSri,
-                        XmlProcesados = ExtraerComprobantesDesdeLote(xmlFactura.OuterXml),
-                        EstadoRecepcion = respuesta.Data.Estado ?? "NO DEFINIDO",
-                        Success = false,
-                        ClaveAcceso = claveAcceso
-                    }
-                };
+                // return new FirmarFacturaResponse
+                // {
+                //     Success = false,
+                //     ClaveAcceso = claveAcceso,
+                //     Comprobantes =
+                //     [
+                //         .. ExtraerComprobantesDesdeLote(xmlFactura.OuterXml).Select(extraido => new ComprobanteResponse
+                //         {
+                //             Success = false,
+                //             XmlProcesado = extraido.XmlCData,
+                //             ClaveAcceso = extraido.ClaveAcceso,
+                //             EstadoAutorizacion = "NO DEFINIDO",
+                //             EstadoRecepcion = respuesta.Data.Estado
+                //         })
+                //     ]
+                // };
             }
 
             if (claveAcceso is not null)
             {
-                return await VerificarFacturaSri(claveAcceso, xmlFactura.OuterXml, firmarFacturaRequest.Ambiente);
+                return await VerificarFacturaSri(claveAcceso, xmlFactura.OuterXml, firmarFacturaRequest.Ambiente,
+                    comprobantesAutorizados);
             }
 
             return new FirmarFacturaResponse
             {
                 Success = false,
                 ClaveAcceso = claveAcceso,
-                Comprobante = new ComprobanteResponse
-                {
-                    ClaveAcceso = "NO DEFINIDA",
-                    Success = false,
-                    EstadoAutorizacion = "ERROR AL OBTENER CLAVE DE ACCESO",
-                    EstadoRecepcion = "ERROR AL OBTENER CLAVE DE ACCESO",
-                    XmlProcesados = ExtraerComprobantesDesdeLote(xmlFactura.OuterXml)
-                }
+                Comprobantes =
+                [
+                    .. ExtraerComprobantesDesdeLote(xmlFactura.OuterXml).Select(extraido => new ComprobanteResponse
+                    {
+                        Success = false,
+                        XmlProcesado = extraido.XmlCData,
+                        ClaveAcceso = extraido.ClaveAcceso,
+                        EstadoAutorizacion = "NO DEFINIDO",
+                        EstadoRecepcion = "NO DEFINIDO"
+                    })
+                ]
             };
         }
         catch (Exception e)
@@ -131,7 +158,7 @@ public class FirmarFacturaService(
     }
 
     public async Task<FirmarFacturaResponse> VerificarFacturaSri(string claveAcceso, string xmlFacturaFirmado,
-        EnumTipoAmbiente ambiente)
+        EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados)
     {
         try
         {
@@ -139,61 +166,52 @@ public class FirmarFacturaService(
             Response<AutorizarComprobanteResponse.RespuestaAutorizacionComprobante> respuesta =
                 await _sriWebService.AutorizacionComprobanteAsync(claveAcceso);
 
-            if (respuesta is { Ok: false, Data.Autorizaciones.Autorizacion: not null })
+            var comprobantes = new List<ComprobanteResponse>(comprobantesYaAutorizados);
+
+            if (respuesta is { Data.Autorizaciones.Autorizacion: not null })
             {
                 var mensajesSri = new List<ErrorMensajeSri>();
-                int indiceComprobante = 0;
 
-                foreach (AutorizarComprobanteResponse.Autorizacion errorSriComprobante in respuesta.Data.Autorizaciones
+                foreach (AutorizarComprobanteResponse.Autorizacion sriComprobante in respuesta.Data.Autorizaciones
                              .Autorizacion)
                 {
-                    if (errorSriComprobante is { Mensajes.Mensaje: not null })
+                    ComprobanteResponse comprobante = new()
                     {
-                        mensajesSri.AddRange(errorSriComprobante.Mensajes.Mensaje.Select(m => new ErrorMensajeSri
+                        ClaveAcceso = ExtraerClaveAccesoString(sriComprobante.Comprobante ?? ""),
+                        EstadoAutorizacion = sriComprobante.Estado,
+                        EstadoRecepcion = "RECIBIDA",
+                        XmlProcesado = sriComprobante.Comprobante,
+                        Success = true
+                    };
+
+                    if (!respuesta.Ok && sriComprobante is { Mensajes.Mensaje: not null })
+                    {
+                        mensajesSri.AddRange(sriComprobante.Mensajes.Mensaje.Select(m => new ErrorMensajeSri
                         {
-                            IndiceComprobante = indiceComprobante,
-                            ClaveAcceso = respuesta.Data.ClaveAccesoConsultada,
                             Mensaje = $"{m.Mensaje_} - {m.InformacionAdicional}",
-                            XmlProcesado = errorSriComprobante.Comprobante ?? "NO ENCONTRADO",
                             Codigo = $"[{m.Identificador}][{m.Tipo}]"
                         }));
                     }
 
-                    indiceComprobante++;
+                    if (mensajesSri.Any())
+                    {
+                        comprobante.Success = false;
+                        comprobante.ErroresAutorizacion = mensajesSri;
+                    }
+
+                    comprobantes.Add(comprobante);
+
+                    if (comprobante is { ClaveAcceso: not null, XmlProcesado: not null })
+                    {
+                        SafeXmlFileWriter.SaveXml(ConstruirRutaXml(comprobante.ClaveAcceso), comprobante.XmlProcesado);
+                    }
                 }
 
                 return new FirmarFacturaResponse
                 {
                     Success = false,
                     ClaveAcceso = claveAcceso,
-                    Comprobante = new ComprobanteResponse
-                    {
-                        ErroresAutorizacion = mensajesSri,
-                        XmlProcesados = ExtraerComprobantesDesdeLote(xmlFacturaFirmado),
-                        EstadoRecepcion = "RECIBIDA",
-                        EstadoAutorizacion = "NO AUTORIZADO",
-                        Success = false,
-                        ClaveAcceso = claveAcceso
-                    }
-                };
-            }
-
-            if (respuesta.Ok)
-            {
-                SafeXmlFileWriter.SaveXml(ConstruirRutaXml(claveAcceso), xmlFacturaFirmado);
-
-                return new FirmarFacturaResponse
-                {
-                    Success = true,
-                    ClaveAcceso = claveAcceso,
-                    Comprobante = new ComprobanteResponse
-                    {
-                        ClaveAcceso = claveAcceso,
-                        XmlProcesados = ExtraerComprobantesDesdeLote(xmlFacturaFirmado),
-                        EstadoRecepcion = "RECIBIDA",
-                        Success = true,
-                        EstadoAutorizacion = "AUTORIZADO"
-                    }
+                    Comprobantes = comprobantes,
                 };
             }
 
@@ -201,14 +219,17 @@ public class FirmarFacturaService(
             {
                 Success = false,
                 ClaveAcceso = claveAcceso,
-                Comprobante = new ComprobanteResponse
-                {
-                    ClaveAcceso = claveAcceso,
-                    XmlProcesados = ExtraerComprobantesDesdeLote(xmlFacturaFirmado),
-                    EstadoRecepcion = "RECIBIDO",
-                    EstadoAutorizacion = "NO DEFINIDO - ERROR",
-                    Success = false
-                }
+                Comprobantes =
+                [
+                    .. ExtraerComprobantesDesdeLote(xmlFacturaFirmado).Select(extraido => new ComprobanteResponse
+                    {
+                        Success = false,
+                        XmlProcesado = extraido.XmlCData,
+                        ClaveAcceso = extraido.ClaveAcceso,
+                        EstadoAutorizacion = "NO DEFINIDO",
+                        EstadoRecepcion = "RECIBIDA"
+                    })
+                ]
             };
         }
         catch (Exception e)
@@ -218,7 +239,7 @@ public class FirmarFacturaService(
         }
     }
 
-    private async Task<Tuple<XmlDocument, string?>> SerializarXml(FirmarFacturaRequest firmarFacturaRequest)
+    private async Task<XmlDocument> SerializarXml(FirmarFacturaRequest firmarFacturaRequest)
     {
         ArgumentNullException.ThrowIfNull(firmarFacturaRequest);
 
@@ -233,8 +254,11 @@ public class FirmarFacturaService(
             XmlDocument facturaFirmadaXml =
                 await FirmarXml(facturaXmlModel.ToXmlDocument(), facturaXmlModel.InfoTributaria.Ruc);
 
-            comprobantesElement.Add(new XElement("comprobante",
-                new XCData(facturaFirmadaXml.OuterXml)));
+            if (BuscarXmlPorClaveDeAcceso(facturaXmlModel.InfoTributaria.ClaveAcceso) is null)
+            {
+                comprobantesElement.Add(new XElement("comprobante",
+                    new XCData(facturaFirmadaXml.OuterXml)));
+            }
 
             claveAccesoPrimerComprobante ??= facturaXmlModel.InfoTributaria.ClaveAcceso;
         }
@@ -248,8 +272,7 @@ public class FirmarFacturaService(
 
         var documentoLote = new XDocument(new XDeclaration("1.0", "UTF-8", null), lote);
 
-        return new Tuple<XmlDocument, string?>(documentoLote.ToXmlDocument(),
-            BuscarXmlPorClaveDeAcceso(claveAccesoPrimerComprobante!));
+        return documentoLote.ToXmlDocument();
     }
 
     private async Task<XmlDocument> FirmarXml(XmlDocument xmlFactura, string ruc)
@@ -323,7 +346,8 @@ public class FirmarFacturaService(
     private async Task<ConfiguracionEntity> ObtenerConfiguracionEmpresa(string ruc, CancellationToken ct = default)
     {
         return await cache.GetOrSetAsync<ConfiguracionEntity>(ruc,
-            _ => dbContext.Configuraciones.FirstOrDefaultAsync(config => config.RucEmpresa == ruc, ct)!, token: ct, duration: TimeSpan.FromHours(8));
+            _ => dbContext.Configuraciones.FirstOrDefaultAsync(config => config.RucEmpresa == ruc, ct)!, token: ct,
+            duration: TimeSpan.FromHours(8));
     }
 
     private static List<ComprobanteExtraido> ExtraerComprobantesDesdeLote(string xmlLote)
@@ -372,5 +396,16 @@ public class FirmarFacturaService(
         }
 
         return resultado;
+    }
+
+    private string ExtraerClaveAccesoString(string xml)
+    {
+        string startTag = "<claveAcceso>";
+        string endTag = "</claveAcceso>";
+
+        int startIndex = xml.IndexOf(startTag, StringComparison.Ordinal) + startTag.Length;
+        int endIndex = xml.IndexOf(endTag, StringComparison.Ordinal);
+
+        return xml.Substring(startIndex, endIndex - startIndex);
     }
 }
