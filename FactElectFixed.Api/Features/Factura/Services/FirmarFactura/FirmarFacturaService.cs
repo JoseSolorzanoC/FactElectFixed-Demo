@@ -129,6 +129,8 @@ public class FirmarFacturaService(
 
             if (claveAcceso is not null)
             {
+                await Task.Delay(300);
+                
                 return await VerificarFacturaSri(claveAcceso, xmlFactura.OuterXml, firmarFacturaRequest.Ambiente,
                     comprobantesAutorizados);
             }
@@ -201,7 +203,7 @@ public class FirmarFacturaService(
 
                     comprobantes.Add(comprobante);
 
-                    if (comprobante is { ClaveAcceso: not null, XmlProcesado: not null })
+                    if (comprobante is { ClaveAcceso: not null, XmlProcesado: not null, EstadoAutorizacion: "AUTORIZADO" })
                     {
                         SafeXmlFileWriter.SaveXml(ConstruirRutaXml(comprobante.ClaveAcceso), comprobante.XmlProcesado);
                     }
