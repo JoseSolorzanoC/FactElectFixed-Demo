@@ -1,66 +1,44 @@
 ﻿using FactElectFixed.Api.Features.Factura.Requests;
+using FactElectFixed.Api.Requests;
+using FactElectFixed.Api.Validators;
 using FastEndpoints;
 using FluentValidation;
 
 namespace FactElectFixed.Api.Features.Factura.Validators;
 
-public class FirmarFacturaValidator : Validator<FirmarFacturaRequest>
+public class FacturaValidator : Validator<FirmarDocumentoRequest<FacturaRequest>>
 {
-    public FirmarFacturaValidator()
+    public FacturaValidator(IValidator<FacturaRequest> comprobanteValidator,
+#pragma warning disable IDE0060
+        IValidator<InfoFactura> infoFacturaValidator, IValidator<InfoTributaria> infoTributariaValidator,
+        IValidator<Detalle> detalleValidator)
+#pragma warning restore IDE0060
     {
-        RuleForEach(ff => ff.Comprobantes).SetValidator(new FacturaValidator());
+        Include(new FirmarDocumentoRequestValidator<FacturaRequest>(comprobanteValidator));
     }
 }
 
-public class FacturaValidator : Validator<Requests.Factura>
+public class FacturaRequestValidator : Validator<FacturaRequest>
 {
-    public FacturaValidator()
+    public FacturaRequestValidator(
+        IValidator<InfoFactura> infoFacturaValidator,
+        IValidator<InfoTributaria> infoTributariaValidator,
+        IValidator<Detalle> detalleValidator)
     {
-        RuleFor(f => f.InfoFactura).SetValidator(new InfoFacturaValidator());
-        RuleForEach(f => f.Detalles).SetValidator(new DetalleValidator());
-        RuleFor(f => f.InfoTributaria).SetValidator(new InfoTributariaValidator());
-    }
-}
+        RuleFor(x => x.InfoFactura)
+            .NotNull().WithMessage("'InfoFactura' es obligatorio.")
+            .SetValidator(infoFacturaValidator);
 
-public class InfoTributariaValidator : Validator<InfoTributaria>
-{
-    public InfoTributariaValidator()
-    {
-        RuleFor(x => x.TipoEmision)
-            .NotEmpty().WithMessage("El campo 'TipoEmision' es obligatorio.")
-            .Equal(1).WithMessage("El campo 'TipoEmision' debe ser igual a 1.");
+        RuleFor(x => x.InfoTributaria)
+            .NotNull().WithMessage("'InfoTributaria' es obligatorio.")
+            .SetValidator(infoTributariaValidator);
 
-        RuleFor(x => x.RazonSocial)
-            .NotEmpty().WithMessage("El campo 'RazonSocial' es obligatorio.")
-            .MaximumLength(300).WithMessage("El campo 'RazonSocial' no puede tener más de 300 caracteres.");
+        RuleFor(x => x.Detalles)
+            .NotNull().WithMessage("'Detalles' es obligatorio.")
+            .NotEmpty().WithMessage("Debe existir al menos un detalle.");
 
-        RuleFor(x => x.NombreComercial)
-            .MaximumLength(300).WithMessage("El campo 'NombreComercial' no puede tener más de 300 caracteres.")
-            .When(x => !string.IsNullOrEmpty(x.NombreComercial));
-
-        RuleFor(x => x.Ruc)
-            .NotEmpty().WithMessage("El campo 'Ruc' es obligatorio.")
-            .Length(13).WithMessage("El campo 'Ruc' debe tener exactamente 13 caracteres.");
-
-        RuleFor(x => x.CodDoc)
-            .NotEmpty().WithMessage("El campo 'CodDoc' es obligatorio.")
-            .MaximumLength(2).WithMessage("El campo 'CodDoc' no puede tener más de 2 caracteres.");
-
-        RuleFor(x => x.Estab)
-            .NotEmpty().WithMessage("El campo 'Estab' es obligatorio.")
-            .MaximumLength(3).WithMessage("El campo 'Estab' no puede tener más de 3 caracteres.");
-
-        RuleFor(x => x.PtoEmi)
-            .NotEmpty().WithMessage("El campo 'PtoEmi' es obligatorio.")
-            .MaximumLength(3).WithMessage("El campo 'PtoEmi' no puede tener más de 3 caracteres.");
-
-        RuleFor(x => x.Secuencial)
-            .NotEmpty().WithMessage("El campo 'Secuencial' es obligatorio.")
-            .MaximumLength(9).WithMessage("El campo 'Secuencial' no puede tener más de 9 caracteres.");
-
-        RuleFor(x => x.DirMatriz)
-            .NotEmpty().WithMessage("El campo 'DirMatriz' es obligatorio.")
-            .MaximumLength(300).WithMessage("El campo 'DirMatriz' no puede tener más de 300 caracteres.");
+        RuleForEach(x => x.Detalles)
+            .SetValidator(detalleValidator);
     }
 }
 
@@ -155,143 +133,5 @@ public class InfoFacturaValidator : Validator<InfoFactura>
             .InclusiveBetween(0, 999999999999.99M)
             .WithMessage("El campo 'ValorRetRenta' debe estar entre 0 y 999999999999.99.")
             .When(x => x.ValorRetRenta.HasValue);
-    }
-}
-
-public class TotalImpuestoValidator : Validator<TotalImpuesto>
-{
-    private static readonly int[] AllowedCodigoImpuesto = [2, 3, 5];
-
-    public TotalImpuestoValidator()
-    {
-        RuleFor(x => x.Codigo)
-            .NotEmpty().WithMessage("El campo 'Codigo' es obligatorio.")
-            .Must(c => AllowedCodigoImpuesto.Contains(c))
-            .WithMessage("El campo 'Codigo' solo puede tener los valores 2, 3 o 5.");
-
-        RuleFor(x => x.CodigoPorcentaje)
-            .NotEmpty().WithMessage("El campo 'CodigoPorcentaje' es obligatorio.")
-            .InclusiveBetween(1, 9999)
-            .WithMessage("El campo 'CodigoPorcentaje' debe estar entre 1 y 9999.");
-
-        RuleFor(x => x.BaseImponible)
-            .NotNull().WithMessage("El campo 'BaseImponible' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .WithMessage("El campo 'BaseImponible' debe estar entre 0 y 999999999999.99.");
-
-        RuleFor(x => x.Valor)
-            .NotNull().WithMessage("El campo 'Valor' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .WithMessage("El campo 'Valor' debe estar entre 0 y 999999999999.99.");
-    }
-}
-
-public class PagoValidator : Validator<Pago>
-{
-    public PagoValidator()
-    {
-        RuleFor(x => x.FormaPago)
-            .NotEmpty().WithMessage("El campo 'FormaPago' es obligatorio.")
-            .MaximumLength(2).WithMessage("El campo 'FormaPago' no puede tener más de 2 caracteres.");
-
-        RuleFor(x => x.Total)
-            .NotNull().WithMessage("El campo 'Total' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .WithMessage("El campo 'Total' debe estar entre 0 y 999999999999.99.");
-
-        RuleFor(x => x.Plazo)
-            .InclusiveBetween(0, 999999999999.99M)
-            .WithMessage("El campo 'Plazo' debe estar entre 0 y 999999999999.99.")
-            .When(x => x.Plazo != default)
-            .WithMessage("El campo 'Plazo' es opcional, pero debe ser válido si se incluye.");
-
-        RuleFor(x => x.UnidadTiempo)
-            .MaximumLength(10)
-            .WithMessage("El campo 'UnidadTiempo' no puede tener más de 10 caracteres.")
-            .When(x => !string.IsNullOrWhiteSpace(x.UnidadTiempo));
-    }
-}
-
-public class DetalleValidator : Validator<Detalle>
-{
-    public DetalleValidator()
-    {
-        RuleFor(x => x.CodigoPrincipal)
-            .NotEmpty().WithMessage("El campo 'CodigoPrincipal' es obligatorio.")
-            .MaximumLength(25).WithMessage("El campo 'CodigoPrincipal' no puede tener más de 25 caracteres.");
-
-        RuleFor(x => x.CodigoAuxiliar)
-            .MinimumLength(1)
-            .MaximumLength(25)
-            .WithMessage("El campo 'CodigoAuxiliar' no puede tener más de 25 caracteres.")
-            .When(x => !string.IsNullOrWhiteSpace(x.CodigoAuxiliar));
-
-        RuleFor(x => x.Descripcion)
-            .NotEmpty().WithMessage("El campo 'Descripcion' es obligatorio.")
-            .MaximumLength(300).WithMessage("El campo 'Descripcion' no puede tener más de 300 caracteres.");
-
-        RuleFor(x => x.Cantidad)
-            .NotNull().WithMessage("El campo 'Cantidad' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.999999M)
-            .PrecisionScale(18, 6, false)
-            .WithMessage("El campo 'Cantidad' debe estar entre 0 y 999999999999.999999.");
-
-        RuleFor(x => x.PrecioUnitario)
-            .NotNull().WithMessage("El campo 'PrecioUnitario' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.999999M)
-            .PrecisionScale(18, 6, false)
-            .WithMessage("El campo 'PrecioUnitario' debe estar entre 0 y 999999999999.999999.");
-
-        RuleFor(x => x.Descuento)
-            .NotNull().WithMessage("El campo 'Descuento' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .PrecisionScale(18, 6, false)
-            .WithMessage("El campo 'Descuento' debe estar entre 0 y 999999999999.99.");
-
-        RuleFor(x => x.PrecioTotalSinImpuesto)
-            .NotNull().WithMessage("El campo 'PrecioTotalSinImpuesto' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .PrecisionScale(18, 6, false)
-            .WithMessage("El campo 'PrecioTotalSinImpuesto' debe estar entre 0 y 999999999999.99.");
-
-        RuleFor(x => x.Impuestos)
-            .NotNull().WithMessage("La lista 'Impuestos' es obligatoria.")
-            .NotEmpty().WithMessage("Debe especificar al menos un elemento en 'Impuestos'.");
-
-        RuleForEach(x => x.Impuestos)
-            .SetValidator(new ImpuestoValidator());
-    }
-}
-
-public class ImpuestoValidator : Validator<Impuesto>
-{
-    private static readonly int[] AllowedCodigoImpuesto = [2, 3, 5];
-
-    public ImpuestoValidator()
-    {
-        RuleFor(x => x.Codigo)
-            .NotEmpty().WithMessage("El campo 'Codigo' es obligatorio.")
-            .Must(c => AllowedCodigoImpuesto.Contains(c))
-            .WithMessage("El campo 'Codigo' solo puede tener los valores 2, 3 o 5.");
-
-        RuleFor(x => x.CodigoPorcentaje)
-            .NotEmpty().WithMessage("El campo 'CodigoPorcentaje' es obligatorio.")
-            .InclusiveBetween(1, 9999)
-            .WithMessage("El campo 'CodigoPorcentaje' debe estar entre 1 y 9999.");
-
-        RuleFor(x => x.Tarifa)
-            .NotNull().WithMessage("El campo 'Tarifa' es obligatorio.")
-            .InclusiveBetween(0.01M, 9999.99M)
-            .WithMessage("El campo 'Tarifa' debe estar entre 0.01 y 9999.99.");
-
-        RuleFor(x => x.BaseImponible)
-            .NotNull().WithMessage("El campo 'BaseImponible' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .WithMessage("El campo 'BaseImponible' debe estar entre 0 y 999999999999.99.");
-
-        RuleFor(x => x.Valor)
-            .NotNull().WithMessage("El campo 'Valor' es obligatorio.")
-            .InclusiveBetween(0, 999999999999.99M)
-            .WithMessage("El campo 'Valor' debe estar entre 0 y 999999999999.99.");
     }
 }

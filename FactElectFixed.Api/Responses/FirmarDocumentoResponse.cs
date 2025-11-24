@@ -1,6 +1,6 @@
-﻿namespace FactElectFixed.Api.Features.Factura.Reponses;
+﻿namespace FactElectFixed.Api.Responses;
 
-public class FirmarFacturaResponse
+public class FirmarDocumentoResponse
 {
     public bool Success { get; set; }
     public string? ClaveAcceso { get; set; }

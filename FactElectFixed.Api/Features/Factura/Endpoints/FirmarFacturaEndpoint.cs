@@ -1,13 +1,15 @@
-﻿using FactElectFixed.Api.Features.Factura.Reponses;
-using FactElectFixed.Api.Features.Factura.Requests;
-using FactElectFixed.Api.Features.Factura.Services.FirmarFactura;
+﻿using FactElectFixed.Api.Features.Factura.Requests;
+using FactElectFixed.Api.Features.Factura.Xml;
+using FactElectFixed.Api.Requests;
+using FactElectFixed.Api.Responses;
+using FactElectFixed.Api.Services.FirmarDocumento;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace FactElectFixed.Api.Features.Factura.Endpoints;
 
-public class FirmarFacturaEndpoint(IFirmarFacturaService facturaService)
-    : Endpoint<FirmarFacturaRequest, Results<Ok<FirmarFacturaResponse>, ProblemDetails>>
+public class FirmarFacturaEndpoint(IFirmarDocumentoService documentoService)
+    : Endpoint<FirmarDocumentoRequest<FacturaRequest>, Results<Ok<FirmarDocumentoResponse>, ProblemDetails>>
 {
     public override void Configure()
     {
@@ -15,10 +17,10 @@ public class FirmarFacturaEndpoint(IFirmarFacturaService facturaService)
         AllowAnonymous();
     }
 
-    public override async Task<Results<Ok<FirmarFacturaResponse>, ProblemDetails>> ExecuteAsync(
-        FirmarFacturaRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<FirmarDocumentoResponse>, ProblemDetails>> ExecuteAsync(
+        FirmarDocumentoRequest<FacturaRequest> req, CancellationToken ct)
     {
-        FirmarFacturaResponse enviarFacturaSriResponse = await facturaService.EnviarFacturaSri(req);
-        return TypedResults.Ok(enviarFacturaSriResponse);
+        FirmarDocumentoResponse enviarDocumentoSriResponse = await documentoService.EnviarDocumentoSri<FacturaRequest, FacturaXmlModel>(req);
+        return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }

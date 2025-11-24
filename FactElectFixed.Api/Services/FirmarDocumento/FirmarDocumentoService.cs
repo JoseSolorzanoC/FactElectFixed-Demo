@@ -2,12 +2,11 @@
 using System.Xml.Linq;
 using FactElectFixed.Api.Database;
 using FactElectFixed.Api.Features.Configuracion.Entities;
-using FactElectFixed.Api.Features.Factura.Mappers;
-using FactElectFixed.Api.Features.Factura.Reponses;
-using FactElectFixed.Api.Features.Factura.Requests;
 using FactElectFixed.Api.Features.Factura.Xml;
 using FactElectFixed.Api.Helpers;
-using FactElectFixed.Api.Services;
+using FactElectFixed.Api.Helpers.Interfaces;
+using FactElectFixed.Api.Requests;
+using FactElectFixed.Api.Responses;
 using Infoware.SRI.Core.Enumerados;
 using Infoware.SRI.Core.Helpers;
 using Infoware.SRI.Firmar;
@@ -17,32 +16,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using ZiggyCreatures.Caching.Fusion;
 
-namespace FactElectFixed.Api.Features.Factura.Services.FirmarFactura;
+namespace FactElectFixed.Api.Services.FirmarDocumento;
 
-public class FirmarFacturaService(
+public class FirmarDocumentoService(
     ISRIWebService sriWebService,
     IWebHostEnvironment webHostEnvironment,
     ICachedXmlFileService cachedXmlFileService,
     ApplicationDbContext dbContext,
     IFusionCache cache)
-    : IFirmarFacturaService
+    : IFirmarDocumentoService
 {
     private ISRIWebService _sriWebService = sriWebService;
 
-    public async Task<FirmarFacturaResponse> EnviarFacturaSri(FirmarFacturaRequest firmarFacturaRequest)
+    public async Task<FirmarDocumentoResponse>
+        EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest)
+        where TRequest : IDocumentoElectronicoBase<TXmlModel> where TXmlModel : class
     {
         try
         {
             int indiceComprobante = 0;
 
-            _sriWebService = _sriWebService.Using(firmarFacturaRequest.Ambiente, EnumTipoEsquema.Offline);
-            XmlDocument tuplaSerializacion = await SerializarXml(firmarFacturaRequest);
+            _sriWebService = _sriWebService.Using(firmarDocumentoRequest.Ambiente, EnumTipoEsquema.Offline);
+            XmlDocument tuplaSerializacion = await SerializarXml<TRequest, TXmlModel>(firmarDocumentoRequest);
 
             XmlDocument xmlFactura = tuplaSerializacion;
 
             var comprobantesAutorizados = new List<ComprobanteResponse>();
 
-            foreach (Requests.Factura unused in firmarFacturaRequest.Comprobantes)
+            foreach (object _ in firmarDocumentoRequest.Comprobantes)
             {
                 string claveAccesoComprobanteExistente =
                     xmlFactura.SelectNodes("//comprobantes/comprobante")?[indiceComprobante]
@@ -58,7 +59,7 @@ public class FirmarFacturaService(
                         XmlProcesado = cachedXmlFileService.GetXml(rutaXmlExistente),
                         ClaveAcceso = claveAccesoComprobanteExistente,
                         EstadoRecepcion = "RECIBIDA",
-                        EstadoAutorizacion = "AUTORIZADA",
+                        EstadoAutorizacion = "AUTORIZADA"
                     });
                 }
 
@@ -108,34 +109,17 @@ public class FirmarFacturaService(
                     comprobantesAutorizados.Add(comprobante);
                     indiceComprobante++;
                 }
-
-                // return new FirmarFacturaResponse
-                // {
-                //     Success = false,
-                //     ClaveAcceso = claveAcceso,
-                //     Comprobantes =
-                //     [
-                //         .. ExtraerComprobantesDesdeLote(xmlFactura.OuterXml).Select(extraido => new ComprobanteResponse
-                //         {
-                //             Success = false,
-                //             XmlProcesado = extraido.XmlCData,
-                //             ClaveAcceso = extraido.ClaveAcceso,
-                //             EstadoAutorizacion = "NO DEFINIDO",
-                //             EstadoRecepcion = respuesta.Data.Estado
-                //         })
-                //     ]
-                // };
             }
 
             if (claveAcceso is not null)
             {
                 await Task.Delay(300);
-                
-                return await VerificarFacturaSri(claveAcceso, xmlFactura.OuterXml, firmarFacturaRequest.Ambiente,
+
+                return await VerificarDocumentoSri(claveAcceso, xmlFactura.OuterXml, firmarDocumentoRequest.Ambiente,
                     comprobantesAutorizados);
             }
 
-            return new FirmarFacturaResponse
+            return new FirmarDocumentoResponse
             {
                 Success = false,
                 ClaveAcceso = claveAcceso,
@@ -159,7 +143,7 @@ public class FirmarFacturaService(
         }
     }
 
-    public async Task<FirmarFacturaResponse> VerificarFacturaSri(string claveAcceso, string xmlFacturaFirmado,
+    public async Task<FirmarDocumentoResponse> VerificarDocumentoSri(string claveAcceso, string xmlDocumentoFirmado,
         EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados)
     {
         try
@@ -203,27 +187,28 @@ public class FirmarFacturaService(
 
                     comprobantes.Add(comprobante);
 
-                    if (comprobante is { ClaveAcceso: not null, XmlProcesado: not null, EstadoAutorizacion: "AUTORIZADO" })
+                    if (comprobante is
+                        { ClaveAcceso: not null, XmlProcesado: not null, EstadoAutorizacion: "AUTORIZADO" })
                     {
                         SafeXmlFileWriter.SaveXml(ConstruirRutaXml(comprobante.ClaveAcceso), comprobante.XmlProcesado);
                     }
                 }
 
-                return new FirmarFacturaResponse
+                return new FirmarDocumentoResponse
                 {
                     Success = false,
                     ClaveAcceso = claveAcceso,
-                    Comprobantes = comprobantes,
+                    Comprobantes = comprobantes
                 };
             }
 
-            return new FirmarFacturaResponse
+            return new FirmarDocumentoResponse
             {
                 Success = false,
                 ClaveAcceso = claveAcceso,
                 Comprobantes =
                 [
-                    .. ExtraerComprobantesDesdeLote(xmlFacturaFirmado).Select(extraido => new ComprobanteResponse
+                    .. ExtraerComprobantesDesdeLote(xmlDocumentoFirmado).Select(extraido => new ComprobanteResponse
                     {
                         Success = false,
                         XmlProcesado = extraido.XmlCData,
@@ -241,26 +226,28 @@ public class FirmarFacturaService(
         }
     }
 
-    private async Task<XmlDocument> SerializarXml(FirmarFacturaRequest firmarFacturaRequest)
+    private async Task<XmlDocument>
+        SerializarXml<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest)
+        where TRequest : IDocumentoElectronicoBase<TXmlModel> where TXmlModel : class
     {
-        ArgumentNullException.ThrowIfNull(firmarFacturaRequest);
+        ArgumentNullException.ThrowIfNull(firmarDocumentoRequest);
 
         var comprobantesElement = new XElement("comprobantes");
 
         string? claveAccesoPrimerComprobante = null;
 
         foreach (FacturaXmlModel facturaXmlModel in
-                 firmarFacturaRequest.Comprobantes.Select(factura =>
-                     factura.ToXml(firmarFacturaRequest.Ambiente, firmarFacturaRequest.Version)))
+                 firmarDocumentoRequest.Comprobantes.Select<TRequest, object>(factura =>
+                     factura.ToXml(firmarDocumentoRequest.Ambiente, firmarDocumentoRequest.Version)))
         {
             XmlDocument facturaFirmadaXml =
                 await FirmarXml(facturaXmlModel.ToXmlDocument(), facturaXmlModel.InfoTributaria.Ruc);
 
-            if (BuscarXmlPorClaveDeAcceso(facturaXmlModel.InfoTributaria.ClaveAcceso) is null)
-            {
-                comprobantesElement.Add(new XElement("comprobante",
-                    new XCData(facturaFirmadaXml.OuterXml)));
-            }
+            // if (BuscarXmlPorClaveDeAcceso(facturaXmlModel.InfoTributaria.ClaveAcceso) is not null)
+            // {
+            comprobantesElement.Add(new XElement("comprobante",
+                new XCData(facturaFirmadaXml.OuterXml)));
+            // }
 
             claveAccesoPrimerComprobante ??= facturaXmlModel.InfoTributaria.ClaveAcceso;
         }
@@ -268,7 +255,7 @@ public class FirmarFacturaService(
         var lote = new XElement("lote",
             new XAttribute("version", "1.0.0"),
             new XElement("claveAcceso", claveAccesoPrimerComprobante!),
-            new XElement("ruc", firmarFacturaRequest.Comprobantes[0].InfoTributaria.Ruc),
+            new XElement("ruc", firmarDocumentoRequest.Comprobantes[0].InfoTributaria.Ruc),
             comprobantesElement
         );
 

@@ -10,6 +10,7 @@
         <!--        <PackageReference Include="EFCore.NamingConventions" />-->
         <PackageReference Include="FastEndpoints"/>
         <PackageReference Include="FastEndpoints.Swagger"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
         <PackageReference Include="Infoware.SRI.DocumentosElectronicos"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
