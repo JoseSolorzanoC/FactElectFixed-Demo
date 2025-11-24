@@ -20,8 +20,7 @@ public class RetencionRequestValidator : Validator<RetencionRequest>
     public RetencionRequestValidator(
         IValidator<InfoCompRetencion> infoCompRetencionValidator,
         IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<DocSustento> docSustentoValidator,
-        IValidator<CampoAdicional> campoAdicionalValidator)
+        IValidator<DocSustento> docSustentoValidator)
     {
         RuleFor(x => x.InfoCompRetencion)
             .NotNull().WithMessage("'InfoCompRetencion' es obligatorio.")
@@ -38,9 +37,9 @@ public class RetencionRequestValidator : Validator<RetencionRequest>
         RuleForEach(x => x.DocsSustento)
             .SetValidator(docSustentoValidator);
 
-        RuleForEach(x => x.InfoAdicional)
-            .SetValidator(campoAdicionalValidator)
-            .When(x => x.InfoAdicional != null && x.InfoAdicional.Any());
+        // RuleForEach(x => x.InfoAdicional)
+        //     .SetValidator(new CampoAdicionalVali)
+        //     .When(x => x.InfoAdicional != null && x.InfoAdicional.Any());
     }
 }
 
@@ -79,7 +78,7 @@ public class InfoCompRetencionValidator : Validator<InfoCompRetencion>
 
 public class DocSustentoValidator : Validator<DocSustento>
 {
-    public DocSustentoValidator(IValidator<ImpuestoDocSustento> impuestoValidator, IValidator<RetencionDetalle> retencionValidator, IValidator<Pago> pagoValidator, IValidator<ReembolsoDetalle>? reembolsoValidator = null)
+    public DocSustentoValidator(IValidator<ImpuestoDocSustento> impuestoValidator, IValidator<RetencionDetalle> retencionValidator, IValidator<Pago> pagoValidator)
     {
         RuleFor(x => x.CodSustento)
             .NotEmpty().WithMessage("'CodSustento' es obligatorio.");
@@ -102,10 +101,10 @@ public class DocSustentoValidator : Validator<DocSustento>
 
         RuleForEach(x => x.Pagos).SetValidator(pagoValidator);
 
-        if (reembolsoValidator != null)
-        {
-            RuleFor(x => x.ReembolsoDetalle).SetValidator(reembolsoValidator).When(x => x.ReembolsoDetalle != null);
-        }
+        // if (reembolsoValidator != null)
+        // {
+        //     RuleFor(x => x.ReembolsoDetalle).SetValidator(reembolsoValidator).When(x => x.ReembolsoDetalle != null);
+        // }
     }
 }
 

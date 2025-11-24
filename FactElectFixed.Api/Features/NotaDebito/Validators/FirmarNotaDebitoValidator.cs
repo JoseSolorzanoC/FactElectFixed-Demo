@@ -22,8 +22,7 @@ public class NotaDebitoRequestValidator : Validator<NotaDebitoRequest>
 {
     public NotaDebitoRequestValidator(
         IValidator<InfoNotaDebito> infoNotaDebitoValidator,
-        IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<Motivo> motivoValidator)
+        IValidator<InfoTributaria> infoTributariaValidator)
     {
         RuleFor(x => x.InfoNotaDebito)
             .NotNull().WithMessage("'InfoNotaDebito' es obligatorio.")
@@ -38,7 +37,7 @@ public class NotaDebitoRequestValidator : Validator<NotaDebitoRequest>
             .NotEmpty().WithMessage("Debe existir al menos un motivo.");
 
         RuleForEach(x => x.Motivos)
-            .SetValidator(motivoValidator);
+            .SetValidator(new MotivoValidator());
     }
 }
 
