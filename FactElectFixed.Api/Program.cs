@@ -33,18 +33,22 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints().SwaggerDocument();
 
 builder.Services.AddTransient<IValidator<InfoFactura>, InfoFacturaValidator>();
-builder.Services.AddTransient<IValidator<InfoNotaCredito>, InfoNotaCreditoValidator>();
-builder.Services.AddTransient<IValidator<InfoNotaDebito>, InfoNotaDebitoValidator>();
-builder.Services.AddTransient<IValidator<InfoCompRetencion>, InfoCompRetencionValidator>();
+builder.Services.AddTransient<IValidator<InfoNotaCreditoRequest>, InfoNotaCreditoValidator>();
+builder.Services.AddTransient<IValidator<InfoNotaDebitoRequest>, InfoNotaDebitoValidator>();
+builder.Services.AddTransient<IValidator<InfoCompRetencionRequest>, InfoCompRetencionValidator>();
 
-builder.Services.AddTransient<IValidator<InfoTributaria>, InfoTributariaValidator>();
-builder.Services.AddTransient<IValidator<Detalle>, DetalleValidator>();
-builder.Services.AddTransient<IValidator<TotalImpuesto>, TotalImpuestoValidator>();
-builder.Services.AddTransient<IValidator<Pago>, PagoValidator>();
-builder.Services.AddTransient<IValidator<Impuesto>, ImpuestoValidator>();
-builder.Services.AddTransient<IValidator<ImpuestoDocSustento>, ImpuestoDocSustentoValidator>();
-builder.Services.AddTransient<IValidator<RetencionDetalle>, RetencionDetalleValidator>();
-builder.Services.AddTransient<IValidator<DocSustento>, DocSustentoValidator>();
+builder.Services.AddTransient<IValidator<InfoTributariaRequest>, InfoTributariaValidator>();
+builder.Services.AddTransient<IValidator<DetalleRequest>, DetalleValidator>();
+builder.Services.AddTransient<IValidator<TotalImpuestoRequest>, TotalImpuestoValidator>();
+builder.Services.AddTransient<IValidator<PagoRequest>, PagoValidator>();
+builder.Services.AddTransient<IValidator<ImpuestoRequest>, ImpuestoValidator>();
+builder.Services.AddTransient<IValidator<ImpuestoDocSustentoRequest>, ImpuestoDocSustentoValidator>();
+builder.Services.AddTransient<IValidator<RetencionDetalleRequest>, RetencionDetalleValidator>();
+builder.Services.AddTransient<IValidator<DocSustentoRequest>, DocSustentoValidator>();
+builder.Services.AddTransient<IValidator<DetalleNotaCreditoRequest>, DetalleNotaCreditoValidator>();
+builder.Services.AddTransient<IValidator<DetAdicionalRequest>, DetAdicionalRequestValidator>();
+builder.Services.AddTransient<IValidator<MotivoRequest>, MotivoValidator>();
+
 
 builder.Services.AddTransient<IValidator<FacturaRequest>, FacturaRequestValidator>();
 builder.Services.AddTransient<IValidator<NotaCreditoRequest>, NotaCreditoRequestValidator>();

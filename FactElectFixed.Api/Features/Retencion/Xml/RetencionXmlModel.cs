@@ -4,7 +4,7 @@ using FactElectFixed.Api.Helpers.Models;
 namespace FactElectFixed.Api.Features.Retencion.Xml;
 
 [XmlRoot("comprobanteRetencion")]
-public class RetencionXmlModel
+public class RetencionXmlModel : IDocumentoXmlModel
 {
     [XmlAttribute("id")]
     public string Id { get; set; } = "comprobante";
@@ -13,7 +13,7 @@ public class RetencionXmlModel
     public string Version { get; set; }
 
     [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributaria InfoTributaria { get; set; }
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 
     [XmlElement("infoCompRetencion", Order = 2)]
     public InfoCompRetencionXml InfoCompRetencion { get; set; }
@@ -252,13 +252,4 @@ public class PagoXml
 
     [XmlElement("total", Order = 2)]
     public decimal Total { get; set; }
-}
-
-public class CampoAdicionalXml
-{
-    [XmlAttribute("nombre")]
-    public string Nombre { get; set; }
-
-    [XmlText]
-    public string Valor { get; set; }
 }

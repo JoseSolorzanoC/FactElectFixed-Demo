@@ -1,5 +1,4 @@
-﻿using FactElectFixed.Api.Helpers.Interfaces;
-using FactElectFixed.Api.Requests;
+﻿using FactElectFixed.Api.Requests;
 using FastEndpoints;
 using FluentValidation;
 
@@ -28,7 +27,7 @@ public class FirmarDocumentoRequestValidator<T> : Validator<FirmarDocumentoReque
     } 
 }
 
-public class InfoTributariaValidator : Validator<InfoTributaria>
+public class InfoTributariaValidator : Validator<InfoTributariaRequest>
 {
     public InfoTributariaValidator()
     {
@@ -70,7 +69,7 @@ public class InfoTributariaValidator : Validator<InfoTributaria>
     }
 }
 
-public class TotalImpuestoValidator : Validator<TotalImpuesto>
+public class TotalImpuestoValidator : Validator<TotalImpuestoRequest>
 {
     private static readonly int[] AllowedCodigoImpuesto = [2, 3, 5];
 
@@ -98,7 +97,7 @@ public class TotalImpuestoValidator : Validator<TotalImpuesto>
     }
 }
 
-public class PagoValidator : Validator<Pago>
+public class PagoValidator : Validator<PagoRequest>
 {
     public PagoValidator()
     {
@@ -124,7 +123,7 @@ public class PagoValidator : Validator<Pago>
     }
 }
 
-public class DetalleValidator : Validator<Detalle>
+public class DetalleValidator : Validator<DetalleRequest>
 {
     public DetalleValidator()
     {
@@ -175,7 +174,7 @@ public class DetalleValidator : Validator<Detalle>
     }
 }
 
-public class ImpuestoValidator : Validator<Impuesto>
+public class ImpuestoValidator : Validator<ImpuestoRequest>
 {
     private static readonly int[] AllowedCodigoImpuesto = [2, 3, 5];
 

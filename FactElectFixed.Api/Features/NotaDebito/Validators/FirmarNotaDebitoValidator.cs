@@ -10,8 +10,8 @@ public class NotaDebitoValidator : Validator<FirmarDocumentoRequest<NotaDebitoRe
 {
     public NotaDebitoValidator(IValidator<NotaDebitoRequest> comprobanteValidator,
 #pragma warning disable IDE0060
-        IValidator<InfoNotaDebito> infoNotaCreditoValidator, IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<Detalle> detalleValidator)
+        IValidator<InfoNotaDebitoRequest> infoNotaCreditoValidator, IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<DetalleRequest> detalleValidator)
 #pragma warning restore IDE0060
     {
         Include(new FirmarDocumentoRequestValidator<NotaDebitoRequest>(comprobanteValidator));
@@ -21,15 +21,16 @@ public class NotaDebitoValidator : Validator<FirmarDocumentoRequest<NotaDebitoRe
 public class NotaDebitoRequestValidator : Validator<NotaDebitoRequest>
 {
     public NotaDebitoRequestValidator(
-        IValidator<InfoNotaDebito> infoNotaDebitoValidator,
-        IValidator<InfoTributaria> infoTributariaValidator)
+        IValidator<InfoNotaDebitoRequest> infoNotaDebitoValidator,
+        IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<MotivoRequest> motivoValidator)
     {
-        RuleFor(x => x.InfoNotaDebito)
-            .NotNull().WithMessage("'InfoNotaDebito' es obligatorio.")
+        RuleFor(x => x.InfoNotaDebitoRequest)
+            .NotNull().WithMessage("'InfoNotaDebitoRequest' es obligatorio.")
             .SetValidator(infoNotaDebitoValidator);
 
-        RuleFor(x => x.InfoTributaria)
-            .NotNull().WithMessage("'InfoTributaria' es obligatorio.")
+        RuleFor(x => x.InfoTributariaRequest)
+            .NotNull().WithMessage("'InfoTributariaXml' es obligatorio.")
             .SetValidator(infoTributariaValidator);
 
         RuleFor(x => x.Motivos)
@@ -37,14 +38,14 @@ public class NotaDebitoRequestValidator : Validator<NotaDebitoRequest>
             .NotEmpty().WithMessage("Debe existir al menos un motivo.");
 
         RuleForEach(x => x.Motivos)
-            .SetValidator(new MotivoValidator());
+            .SetValidator(motivoValidator);
     }
 }
 
-public class InfoNotaDebitoValidator : Validator<InfoNotaDebito>
+public class InfoNotaDebitoValidator : Validator<InfoNotaDebitoRequest>
 {
     public InfoNotaDebitoValidator(
-        IValidator<Impuesto> impuestoValidator, IValidator<Pago> pagoValidator
+        IValidator<ImpuestoRequest> impuestoValidator, IValidator<PagoRequest> pagoValidator
     )
     {
         RuleFor(x => x.FechaEmision)
@@ -113,7 +114,7 @@ public class InfoNotaDebitoValidator : Validator<InfoNotaDebito>
     }
 }
 
-public class MotivoValidator : Validator<Motivo>
+public class MotivoValidator : Validator<MotivoRequest>
 {
     public MotivoValidator()
     {

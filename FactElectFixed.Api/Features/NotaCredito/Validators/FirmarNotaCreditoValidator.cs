@@ -1,5 +1,5 @@
-﻿using FactElectFixed.Api.Features.Factura.Requests;
-using FactElectFixed.Api.Features.NotaCredito.Requests;
+﻿using FactElectFixed.Api.Features.NotaCredito.Requests;
+using FactElectFixed.Api.Helpers;
 using FactElectFixed.Api.Requests;
 using FactElectFixed.Api.Validators;
 using FastEndpoints;
@@ -11,8 +11,8 @@ public class NotaCreditoValidator : Validator<FirmarDocumentoRequest<NotaCredito
 {
     public NotaCreditoValidator(IValidator<NotaCreditoRequest> comprobanteValidator,
 #pragma warning disable IDE0060
-        IValidator<InfoNotaCredito> infoNotaCreditoValidator, IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<Detalle> detalleValidator)
+        IValidator<InfoNotaCreditoRequest> infoNotaCreditoValidator, IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<DetalleRequest> detalleValidator)
 #pragma warning restore IDE0060
     {
         Include(new FirmarDocumentoRequestValidator<NotaCreditoRequest>(comprobanteValidator));
@@ -22,16 +22,16 @@ public class NotaCreditoValidator : Validator<FirmarDocumentoRequest<NotaCredito
 public class NotaCreditoRequestValidator : Validator<NotaCreditoRequest>
 {
     public NotaCreditoRequestValidator(
-        IValidator<InfoNotaCredito> infoNotaCreditoValidator,
-        IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<Detalle> detalleValidator)
+        IValidator<InfoNotaCreditoRequest> infoNotaCreditoValidator,
+        IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<DetalleNotaCreditoRequest> detalleValidator)
     {
-        RuleFor(x => x.InfoNotaCredito)
-            .NotNull().WithMessage("'InfoNotaCredito' es obligatorio.")
+        RuleFor(x => x.InfoNotaCreditoRequest)
+            .NotNull().WithMessage("'InfoNotaCreditoXml' es obligatorio.")
             .SetValidator(infoNotaCreditoValidator);
 
-        RuleFor(x => x.InfoTributaria)
-            .NotNull().WithMessage("'InfoTributaria' es obligatorio.")
+        RuleFor(x => x.InfoTributariaRequest)
+            .NotNull().WithMessage("'InfoTributariaXml' es obligatorio.")
             .SetValidator(infoTributariaValidator);
 
         RuleFor(x => x.Detalles)
@@ -43,7 +43,70 @@ public class NotaCreditoRequestValidator : Validator<NotaCreditoRequest>
     }
 }
 
-public class InfoNotaCreditoValidator : Validator<InfoNotaCredito>
+public class DetalleNotaCreditoValidator : Validator<DetalleNotaCreditoRequest>
+{
+    public DetalleNotaCreditoValidator(
+        IValidator<DetAdicionalRequest> detAdicionalValidator, IValidator<ImpuestoRequest> impuestoValidator
+        )
+    {
+         RuleFor(x => x.CodigoInterno)
+            .MaximumLength(25);
+
+        RuleFor(x => x.CodigoAdicional)
+            .MaximumLength(25);
+
+        RuleFor(x => x.Descripcion)
+            .NotEmpty()
+            .MaximumLength(300);
+
+        RuleFor(x => x.Cantidad)
+            .NotNull()
+            .Must(d => ValidationHelpers.HasPrecisionAndScale(d, 18, 6))
+            .WithMessage("Cantidad excede precisión/escala (max 18, hasta 6 decimales).");
+
+        RuleFor(x => x.PrecioUnitario)
+            .NotNull()
+            .Must(d => ValidationHelpers.HasPrecisionAndScale(d, 18, 6))
+            .WithMessage("PrecioUnitario excede precisión/escala (max 18, hasta 6 decimales).");
+
+        RuleFor(x => x.Descuento)
+            .Must(d => d == null || ValidationHelpers.HasPrecisionAndScale(d.Value, 14, 2))
+            .WithMessage("Descuento excede precisión/escala (max 14, 2 decimales).");
+
+        RuleFor(x => x.PrecioTotalSinImpuesto)
+            .NotNull()
+            .Must(d => ValidationHelpers.HasPrecisionAndScale(d, 14, 2))
+            .WithMessage("PrecioTotalSinImpuesto excede precisión/escala (max 14, 2 decimales).");
+
+        RuleFor(x => x.DetallesAdicionales)
+            .Must(d => d == null || d.Any()).When(x => x.DetallesAdicionales != null)
+            .WithMessage("Si DetallesAdicionales existe, debe contener al menos un detAdicional.");
+
+        RuleForEach(x => x.DetallesAdicionales).SetValidator(detAdicionalValidator);
+
+        RuleFor(x => x.Impuestos)
+            .NotNull().WithMessage("Impuestos es requerido en cada detalle.")
+            .Must(list => list.Any()).WithMessage("Impuestos debe contener al menos un impuesto.");
+
+        RuleForEach(x => x.Impuestos).SetValidator(impuestoValidator);
+    }
+}
+
+public class DetAdicionalRequestValidator : AbstractValidator<DetAdicionalRequest>
+{
+    public DetAdicionalRequestValidator()
+    {
+        RuleFor(x => x.Nombre)
+            .NotEmpty()
+            .MaximumLength(300);
+
+        RuleFor(x => x.Valor)
+            .NotEmpty()
+            .MaximumLength(300);
+    }
+}
+
+public class InfoNotaCreditoValidator : Validator<InfoNotaCreditoRequest>
 {
     public InfoNotaCreditoValidator()
     {
@@ -95,7 +158,8 @@ public class InfoNotaCreditoValidator : Validator<InfoNotaCredito>
 
         RuleFor(x => x.FechaEmisionDocSustento)
             .NotEmpty().WithMessage("El campo 'FechaEmisionDocSustento' es obligatorio.")
-            .MaximumLength(10).WithMessage("El campo 'FechaEmisionDocSustento' no puede tener más de 10 caracteres.");
+            .LessThanOrEqualTo(DateTime.Today)
+            .WithMessage("El campo 'FechaEmision' no puede ser una fecha futura.");
 
         RuleFor(x => x.TotalSinImpuestos)
             .InclusiveBetween(0, 999999999999.99M)
@@ -118,8 +182,8 @@ public class InfoNotaCreditoValidator : Validator<InfoNotaCredito>
             .SetValidator(new TotalImpuestoValidator());
 
         RuleFor(x => x.Motivo)
-            .NotEmpty().WithMessage("El campo 'Motivo' es obligatorio.")
+            .NotEmpty().WithMessage("El campo 'MotivoRequest' es obligatorio.")
             .MaximumLength(300)
-            .WithMessage("El campo 'Motivo' no puede tener más de 300 caracteres.");
+            .WithMessage("El campo 'MotivoRequest' no puede tener más de 300 caracteres.");
     }
 }

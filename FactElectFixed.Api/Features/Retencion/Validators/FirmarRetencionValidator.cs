@@ -18,21 +18,21 @@ public class RetencionValidator : Validator<FirmarDocumentoRequest<RetencionRequ
 public class RetencionRequestValidator : Validator<RetencionRequest>
 {
     public RetencionRequestValidator(
-        IValidator<InfoCompRetencion> infoCompRetencionValidator,
-        IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<DocSustento> docSustentoValidator)
+        IValidator<InfoCompRetencionRequest> infoCompRetencionValidator,
+        IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<DocSustentoRequest> docSustentoValidator)
     {
-        RuleFor(x => x.InfoCompRetencion)
-            .NotNull().WithMessage("'InfoCompRetencion' es obligatorio.")
+        RuleFor(x => x.InfoCompRetencionRequest)
+            .NotNull().WithMessage("'InfoCompRetencionRequest' es obligatorio.")
             .SetValidator(infoCompRetencionValidator);
 
-        RuleFor(x => x.InfoTributaria)
-            .NotNull().WithMessage("'InfoTributaria' es obligatorio.")
+        RuleFor(x => x.InfoTributariaRequest)
+            .NotNull().WithMessage("'InfoTributariaXml' es obligatorio.")
             .SetValidator(infoTributariaValidator);
 
         RuleFor(x => x.DocsSustento)
             .NotNull().WithMessage("'DocsSustento' es obligatorio.")
-            .NotEmpty().WithMessage("Debe existir al menos un 'DocSustento'.");
+            .NotEmpty().WithMessage("Debe existir al menos un 'DocSustentoRequest'.");
 
         RuleForEach(x => x.DocsSustento)
             .SetValidator(docSustentoValidator);
@@ -43,7 +43,7 @@ public class RetencionRequestValidator : Validator<RetencionRequest>
     }
 }
 
-public class InfoCompRetencionValidator : Validator<InfoCompRetencion>
+public class InfoCompRetencionValidator : Validator<InfoCompRetencionRequest>
 {
     public InfoCompRetencionValidator()
     {
@@ -76,9 +76,9 @@ public class InfoCompRetencionValidator : Validator<InfoCompRetencion>
     }
 }
 
-public class DocSustentoValidator : Validator<DocSustento>
+public class DocSustentoValidator : Validator<DocSustentoRequest>
 {
-    public DocSustentoValidator(IValidator<ImpuestoDocSustento> impuestoValidator, IValidator<RetencionDetalle> retencionValidator, IValidator<Pago> pagoValidator)
+    public DocSustentoValidator(IValidator<ImpuestoDocSustentoRequest> impuestoValidator, IValidator<RetencionDetalleRequest> retencionValidator, IValidator<PagoRequest> pagoValidator)
     {
         RuleFor(x => x.CodSustento)
             .NotEmpty().WithMessage("'CodSustento' es obligatorio.");
@@ -103,12 +103,12 @@ public class DocSustentoValidator : Validator<DocSustento>
 
         // if (reembolsoValidator != null)
         // {
-        //     RuleFor(x => x.ReembolsoDetalle).SetValidator(reembolsoValidator).When(x => x.ReembolsoDetalle != null);
+        //     RuleFor(x => x.ReembolsoDetalleRequest).SetValidator(reembolsoValidator).When(x => x.ReembolsoDetalleRequest != null);
         // }
     }
 }
 
-public class ImpuestoDocSustentoValidator : Validator<ImpuestoDocSustento>
+public class ImpuestoDocSustentoValidator : Validator<ImpuestoDocSustentoRequest>
 {
     public ImpuestoDocSustentoValidator()
     {
@@ -120,7 +120,7 @@ public class ImpuestoDocSustentoValidator : Validator<ImpuestoDocSustento>
     }
 }
 
-public class RetencionDetalleValidator : Validator<RetencionDetalle>
+public class RetencionDetalleValidator : Validator<RetencionDetalleRequest>
 {
     public RetencionDetalleValidator()
     {

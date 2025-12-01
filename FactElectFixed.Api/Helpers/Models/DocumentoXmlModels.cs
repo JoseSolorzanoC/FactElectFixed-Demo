@@ -2,7 +2,7 @@
 
 namespace FactElectFixed.Api.Helpers.Models;
 
-public class InfoTributaria
+public class InfoTributariaXml
 {
     [XmlElement("ambiente", Order = 1)] public int Ambiente { get; set; }
 
@@ -28,7 +28,7 @@ public class InfoTributaria
     [XmlElement("dirMatriz", Order = 11)] public string DirMatriz { get; set; }
 }
 
-public class TotalImpuesto
+public class TotalImpuestoXml
 {
     [XmlElement("codigo", Order = 1)] public int Codigo { get; set; }
 
@@ -41,7 +41,7 @@ public class TotalImpuesto
     [XmlElement("valor", Order = 4)] public decimal Valor { get; set; }
 }
 
-public class Pago
+public class PagoXml
 {
     [XmlElement("formaPago", Order = 1)] public string FormaPago { get; set; }
 
@@ -53,7 +53,7 @@ public class Pago
     public string UnidadTiempo { get; set; }
 }
 
-public class Detalle
+public class DetalleXml
 {
     [XmlElement("codigoPrincipal", Order = 1)]
     public string CodigoPrincipal { get; set; }
@@ -75,10 +75,10 @@ public class Detalle
 
     [XmlArray("impuestos", Order = 8)]
     [XmlArrayItem("impuesto")]
-    public List<Impuesto> Impuestos { get; set; }
+    public List<ImpuestoXml> Impuestos { get; set; }
 }
 
-public class Impuesto
+public class ImpuestoXml
 {
     [XmlElement("codigo", Order = 1)] public int Codigo { get; set; }
 
@@ -93,9 +93,23 @@ public class Impuesto
     [XmlElement("valor", Order = 5)] public decimal Valor { get; set; }
 }
 
-public class Rubro
+public class RubroXml
 {
     [XmlElement("concepto", Order = 1)] public string Concepto { get; set; }
 
     [XmlElement("total", Order = 2)] public decimal Total { get; set; }
+}
+
+public class CampoAdicionalXml
+{
+    [XmlAttribute("nombre")]
+    public string Nombre { get; set; }
+
+    [XmlText]
+    public string Valor { get; set; }
+}
+
+public interface IDocumentoXmlModel
+{
+    InfoTributariaXml InfoTributariaXml { get; set; }
 }

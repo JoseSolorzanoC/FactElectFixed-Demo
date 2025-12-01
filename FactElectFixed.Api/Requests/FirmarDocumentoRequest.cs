@@ -11,7 +11,7 @@ public class FirmarDocumentoRequest<T>
     [FromBody] public List<T> Comprobantes { get; set; }
 }
 
-public class InfoTributaria
+public class InfoTributariaRequest
 {
     public int TipoEmision { get; set; }
     public string RazonSocial { get; set; }
@@ -24,7 +24,7 @@ public class InfoTributaria
     public string DirMatriz { get; set; }
 }
 
-public class TotalImpuesto
+public class TotalImpuestoRequest
 {
     public int Codigo { get; set; }
     public int CodigoPorcentaje { get; set; }
@@ -32,7 +32,7 @@ public class TotalImpuesto
     public decimal Valor { get; set; }
 }
 
-public class Pago
+public class PagoRequest
 {
     public string FormaPago { get; set; }
     public decimal Total { get; set; }
@@ -40,7 +40,7 @@ public class Pago
     public string UnidadTiempo { get; set; }
 }
 
-public class Detalle
+public class DetalleRequest
 {
     public string CodigoPrincipal { get; set; }
     public string CodigoAuxiliar { get; set; }
@@ -49,14 +49,20 @@ public class Detalle
     public decimal PrecioUnitario { get; set; }
     public decimal Descuento { get; set; }
     public decimal PrecioTotalSinImpuesto { get; set; }
-    public List<Impuesto> Impuestos { get; set; }
+    public List<ImpuestoRequest> Impuestos { get; set; }
 }
 
-public class Impuesto
+public class ImpuestoRequest
 {
     public int Codigo { get; set; }
     public int CodigoPorcentaje { get; set; }
     public decimal Tarifa { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal Valor { get; set; }
+}
+
+public class CampoAdicionalRequest
+{
+    public string Nombre { get; set; }
+    public string Valor { get; set; }
 }

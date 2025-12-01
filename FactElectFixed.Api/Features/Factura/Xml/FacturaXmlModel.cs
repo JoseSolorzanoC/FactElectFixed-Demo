@@ -5,27 +5,27 @@ using FactElectFixed.Api.Helpers.Models;
 namespace FactElectFixed.Api.Features.Factura.Xml;
 
 [XmlRoot("factura", Namespace = "", IsNullable = false)]
-public class FacturaXmlModel
+public class FacturaXmlModel : IDocumentoXmlModel
 {
     [XmlAttribute("id")] public string Id { get; set; } = "comprobante";
 
     [XmlAttribute("version")] public string Version { get; set; } = "2.1.0";
 
     [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributaria InfoTributaria { get; set; }
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 
-    [XmlElement("infoFactura", Order = 2)] public InfoFactura InfoFactura { get; set; }
+    [XmlElement("infoFactura", Order = 2)] public InfoFacturaXml InfoFacturaXml { get; set; }
 
     [XmlArray("detalles", Order = 3)]
     [XmlArrayItem("detalle")]
-    public List<Detalle> Detalles { get; set; }
+    public List<DetalleXml> Detalles { get; set; }
 
     [XmlArray("otrosRubrosTerceros", Order = 4)]
     [XmlArrayItem("rubro")]
-    public List<Rubro>? OtrosRubrosTerceros { get; set; }
+    public List<RubroXml>? OtrosRubrosTerceros { get; set; }
 }
 
-public class InfoFactura
+public class InfoFacturaXml
 {
     [XmlElement("fechaEmision", Order = 1)]
     public string FechaEmisionString
@@ -75,7 +75,7 @@ public class InfoFactura
 
     [XmlArray("totalConImpuestos", Order = 11)]
     [XmlArrayItem("totalImpuesto")]
-    public List<TotalImpuesto> TotalConImpuestos { get; set; }
+    public List<TotalImpuestoXml> TotalConImpuestos { get; set; }
 
     [XmlElement("propina", Order = 12)] public decimal Propina { get; set; }
 
@@ -86,7 +86,7 @@ public class InfoFactura
 
     [XmlArray("pagos", Order = 15)]
     [XmlArrayItem("pago")]
-    public List<Pago> Pagos { get; set; }
+    public List<PagoXml> Pagos { get; set; }
 
     [XmlElement("valorRetIva", Order = 16)]
     public decimal? ValorRetIva { get; set; }

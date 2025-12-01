@@ -10,8 +10,8 @@ public class FacturaValidator : Validator<FirmarDocumentoRequest<FacturaRequest>
 {
     public FacturaValidator(IValidator<FacturaRequest> comprobanteValidator,
 #pragma warning disable IDE0060
-        IValidator<InfoFactura> infoFacturaValidator, IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<Detalle> detalleValidator)
+        IValidator<InfoFactura> infoFacturaValidator, IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<DetalleRequest> detalleValidator)
 #pragma warning restore IDE0060
     {
         Include(new FirmarDocumentoRequestValidator<FacturaRequest>(comprobanteValidator));
@@ -22,15 +22,15 @@ public class FacturaRequestValidator : Validator<FacturaRequest>
 {
     public FacturaRequestValidator(
         IValidator<InfoFactura> infoFacturaValidator,
-        IValidator<InfoTributaria> infoTributariaValidator,
-        IValidator<Detalle> detalleValidator)
+        IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<DetalleRequest> detalleValidator)
     {
         RuleFor(x => x.InfoFactura)
-            .NotNull().WithMessage("'InfoFactura' es obligatorio.")
+            .NotNull().WithMessage("'InfoFacturaXml' es obligatorio.")
             .SetValidator(infoFacturaValidator);
 
-        RuleFor(x => x.InfoTributaria)
-            .NotNull().WithMessage("'InfoTributaria' es obligatorio.")
+        RuleFor(x => x.InfoTributariaRequest)
+            .NotNull().WithMessage("'InfoTributariaXml' es obligatorio.")
             .SetValidator(infoTributariaValidator);
 
         RuleFor(x => x.Detalles)

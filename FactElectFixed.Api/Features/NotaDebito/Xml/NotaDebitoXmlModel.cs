@@ -1,11 +1,10 @@
 ﻿using System.Xml.Serialization;
 using FactElectFixed.Api.Helpers.Models;
-using InfoTributaria = FactElectFixed.Api.Helpers.Models.InfoTributaria;
 
 namespace FactElectFixed.Api.Features.NotaDebito.Xml;
 
 [XmlRoot("notaDebito")]
-public class NotaDebitoXmlModel
+public class NotaDebitoXmlModel : IDocumentoXmlModel
 {
     [XmlAttribute("version")]
     public string Version { get; set; }
@@ -14,30 +13,21 @@ public class NotaDebitoXmlModel
     public string Id { get; set; } = "comprobante";
 
     [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributaria InfoTributaria { get; set; }
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 
     [XmlElement("infoNotaDebito", Order = 2)]
-    public InfoNotaDebito InfoNotaDebito { get; set; }
+    public InfoNotaDebitoXml InfoNotaDebitoXml { get; set; }
 
     [XmlArray("motivos", Order = 3)]
     [XmlArrayItem("motivo")]
-    public List<Requests.Motivo>? Motivos { get; set; }
+    public List<Requests.MotivoRequest>? Motivos { get; set; }
 
     [XmlArray("infoAdicional", Order = 4)]
     [XmlArrayItem("campoAdicional")]
-    public List<Requests.CampoAdicional>? InfoAdicional { get; set; }
+    public List<CampoAdicionalXml>? InfoAdicional { get; set; }
 }
 
-public class CampoAdicional
-{
-    [XmlAttribute("nombre")]
-    public string Nombre { get; set; }
-
-    [XmlText]
-    public string Valor { get; set; }
-}
-
-public class Motivo
+public class MotivoXml
 {
     [XmlElement("razon", Order = 1)]
     public string Razon { get; set; }
@@ -46,7 +36,7 @@ public class Motivo
     public decimal Valor { get; set; }
 }
 
-public class InfoNotaDebito
+public class InfoNotaDebitoXml
 {
     [XmlElement("fechaEmision", Order = 1)]
     public string FechaEmisionString
@@ -97,12 +87,12 @@ public class InfoNotaDebito
 
     [XmlArray("impuestos", Order = 12)]
     [XmlArrayItem("impuesto")]
-    public List<Impuesto>? Impuestos { get; set; }
+    public List<ImpuestoXml>? Impuestos { get; set; }
 
     [XmlElement("valorTotal", Order = 13)]
     public decimal ValorTotal { get; set; }
 
     [XmlArray("pagos", Order = 14)]
     [XmlArrayItem("pago")]
-    public List<Pago>? Pagos { get; set; }
+    public List<PagoXml>? Pagos { get; set; }
 }

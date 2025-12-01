@@ -1,5 +1,6 @@
 ﻿using FactElectFixed.Api.Features.NotaCredito.Xml;
 using FactElectFixed.Api.Helpers.Interfaces;
+using FactElectFixed.Api.Helpers.Models;
 using FactElectFixed.Api.Requests;
 using Infoware.SRI.Core.Enumerados;
 using Infoware.SRI.Modelos;
@@ -8,104 +9,141 @@ using Infoware.SRI.XSDs;
 
 namespace FactElectFixed.Api.Features.NotaCredito.Requests;
 
-public class NotaCreditoRequest : IDocumentoElectronico<NotaCreditoXmlModel>
+public class NotaCreditoRequest : IDocumentoElectronicoNoDetalles<NotaCreditoXmlModel>
 {
-   public NotaCreditoXmlModel ToXml(EnumTipoAmbiente tipoAmbiente, string version)
-   {
-        return new NotaCreditoXmlModel()
+    public InfoNotaCreditoRequest InfoNotaCreditoRequest { get; set; }
+    public List<DetalleNotaCreditoRequest> Detalles { get; set; }
+    public List<CampoAdicionalRequest> InfoAdicional { get; set; }
+    public InfoTributariaRequest InfoTributariaRequest { get; set; }
+    public NotaCreditoXmlModel ToXml(EnumTipoAmbiente tipoAmbiente, string version)
+    {
+        return new NotaCreditoXmlModel
         {
             Version = version,
-            InfoTributaria = new Api.Helpers.Models.InfoTributaria
+            InfoTributariaXml = new InfoTributariaXml
             {
 #pragma warning disable CA1305
 #pragma warning disable S6562
-                Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(validInDate: new DateTime())),
+                Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(new DateTime())),
 #pragma warning restore S6562
 #pragma warning restore CA1305
-                TipoEmision = InfoTributaria.TipoEmision,
-                RazonSocial = InfoTributaria.RazonSocial,
-                NombreComercial = InfoTributaria.NombreComercial,
-                Ruc = InfoTributaria.Ruc,
+                TipoEmision = InfoTributariaRequest.TipoEmision,
+                RazonSocial = InfoTributariaRequest.RazonSocial,
+                NombreComercial = InfoTributariaRequest.NombreComercial,
+                Ruc = InfoTributariaRequest.Ruc,
 #pragma warning disable CA1305
-                ClaveAcceso = Utils.GenerarClaveAcceso(EnumTipoDocumento.Factura, InfoNotaCredito.FechaEmision,
+                ClaveAcceso = Utils.GenerarClaveAcceso(EnumTipoDocumento.NotaCredito,
+                    InfoNotaCreditoRequest.FechaEmision,
                     new PuntoEmision
                     {
-                        Codigo = int.Parse(InfoTributaria.PtoEmi),
+                        Codigo = int.Parse(InfoTributariaRequest.PtoEmi),
                         Establecimiento = new Establecimiento
                         {
-                            Codigo = int.Parse(InfoTributaria.Estab),
+                            Codigo = int.Parse(InfoTributariaRequest.Estab),
                             Emisor = new Emisor
-                                { RUC = InfoTributaria.Ruc, EnumTipoAmbiente = tipoAmbiente }
+                                { RUC = InfoTributariaRequest.Ruc, EnumTipoAmbiente = tipoAmbiente }
                         }
-                    }, long.Parse(InfoTributaria.Secuencial), EnumTipoEmision.Normal),
+                    }, long.Parse(InfoTributariaRequest.Secuencial), EnumTipoEmision.Normal),
 #pragma warning restore CA1305
-                CodDoc = InfoTributaria.CodDoc,
-                Estab = InfoTributaria.Estab,
-                PtoEmi = InfoTributaria.PtoEmi,
-                Secuencial = InfoTributaria.Secuencial,
-                DirMatriz = InfoTributaria.DirMatriz
+                CodDoc = InfoTributariaRequest.CodDoc,
+                Estab = InfoTributariaRequest.Estab,
+                PtoEmi = InfoTributariaRequest.PtoEmi,
+                Secuencial = InfoTributariaRequest.Secuencial,
+                DirMatriz = InfoTributariaRequest.DirMatriz
             },
-            InfoNotaCredito = new Xml.InfoNotaCredito()
+            InfoNotaCreditoXml = new InfoNotaCreditoXml
             {
-                FechaEmision = InfoNotaCredito.FechaEmision,
-                DirEstablecimiento = InfoNotaCredito.DirEstablecimiento,
-                ContribuyenteEspecial = InfoNotaCredito.ContribuyenteEspecial,
-                ObligadoContabilidad = InfoNotaCredito.ObligadoContabilidad,
-                TipoIdentificacionComprador = InfoNotaCredito.TipoIdentificacionComprador,
-                RazonSocialComprador = InfoNotaCredito.RazonSocialComprador,
-                IdentificacionComprador = InfoNotaCredito.IdentificacionComprador,
-                TotalSinImpuestos = InfoNotaCredito.TotalSinImpuestos,
-                TotalConImpuestos = InfoNotaCredito.TotalConImpuestos.Select(i => new Api.Helpers.Models.TotalImpuesto
+                FechaEmision = InfoNotaCreditoRequest.FechaEmision,
+                FechaEmisionDocSustento = InfoNotaCreditoRequest.FechaEmisionDocSustento,
+                Rise = InfoNotaCreditoRequest.Rise,
+                CodDocModificado = InfoNotaCreditoRequest.CodDocModificado,
+                NumDocModificado = InfoNotaCreditoRequest.NumDocModificado,
+                Motivo = InfoNotaCreditoRequest.Motivo,
+                ValorModificacion = InfoNotaCreditoRequest.ValorModificacion,
+                DirEstablecimiento = InfoNotaCreditoRequest.DirEstablecimiento,
+                ContribuyenteEspecial = InfoNotaCreditoRequest.ContribuyenteEspecial,
+                ObligadoContabilidad = InfoNotaCreditoRequest.ObligadoContabilidad,
+                TipoIdentificacionComprador = InfoNotaCreditoRequest.TipoIdentificacionComprador,
+                RazonSocialComprador = InfoNotaCreditoRequest.RazonSocialComprador,
+                IdentificacionComprador = InfoNotaCreditoRequest.IdentificacionComprador,
+                TotalSinImpuestos = InfoNotaCreditoRequest.TotalSinImpuestos,
+                TotalConImpuestos = [.. InfoNotaCreditoRequest.TotalConImpuestos.Select(i => new TotalImpuestoXml
                 {
                     Codigo = i.Codigo,
                     CodigoPorcentaje = i.CodigoPorcentaje,
                     BaseImponible = i.BaseImponible,
                     Valor = i.Valor
-                }).ToList(),
-                Moneda = InfoNotaCredito.Moneda,
+                })],
+                Moneda = InfoNotaCreditoRequest.Moneda
             },
-            Detalles = Detalles.Select(d => new Detalle
+            Detalles = [.. Detalles.Select(d => new DetalleNotaCreditoXml
             {
-                CodigoPrincipal = d.CodigoPrincipal,
-                CodigoAuxiliar = d.CodigoAuxiliar,
+                CodigoInterno = d.CodigoInterno,
+                CodigoAdicional = d.CodigoAdicional,
                 Descripcion = d.Descripcion,
                 Cantidad = d.Cantidad,
                 PrecioUnitario = d.PrecioUnitario,
-                Descuento = d.Descuento,
+                Descuento = d.Descuento ?? 0,
                 PrecioTotalSinImpuesto = d.PrecioTotalSinImpuesto,
-                Impuestos = d.Impuestos.Select(i => new Impuesto
+                DetallesAdicionales = d.DetallesAdicionales?.Select(d => new DetAdicionalXml
+                {
+                    Nombre = d.Nombre,
+                    Valor = d.Valor
+                }).ToList(),
+                Impuestos = [.. d.Impuestos.Select(i => new ImpuestoXml
                 {
                     Codigo = i.Codigo,
                     CodigoPorcentaje = i.CodigoPorcentaje,
                     Tarifa = i.Tarifa,
                     BaseImponible = i.BaseImponible,
                     Valor = i.Valor
-                }).ToList()
-            }).ToList()
+                })]
+            })],
+            InfoAdicional = [.. InfoAdicional.Select(i => new CampoAdicionalXml
+            {
+                Nombre = i.Nombre,
+                Valor = i.Valor
+            })]
         };
-   }
-
-   public InfoNotaCredito InfoNotaCredito { get; set; }
-   public Api.Requests.InfoTributaria InfoTributaria { get; set; }
-   public List<Api.Requests.Detalle> Detalles { get; set; }
+    }
 }
 
-public class InfoNotaCredito
+public class InfoNotaCreditoRequest
 {
     public DateTime FechaEmision { get; set; }
-    public string DirEstablecimiento { get; set; }
+    public string? DirEstablecimiento { get; set; }
     public string TipoIdentificacionComprador { get; set; }
     public string RazonSocialComprador { get; set; }
     public string IdentificacionComprador { get; set; }
-    public string ContribuyenteEspecial { get; set; }
+    public string? ContribuyenteEspecial { get; set; }
     public bool ObligadoContabilidad { get; set; }
-    public string Rise { get; set; }
+    public string? Rise { get; set; }
     public string CodDocModificado { get; set; }
-    public string NumDocModificado { get; set; }
-    public string FechaEmisionDocSustento { get; set; }
+    public string? NumDocModificado { get; set; }
+    public DateTime FechaEmisionDocSustento { get; set; }
     public decimal TotalSinImpuestos { get; set; }
     public decimal ValorModificacion { get; set; }
-    public string Moneda { get; set; }
-    public List<TotalImpuesto> TotalConImpuestos { get; set; }
-    public string Motivo { get; set; } 
+    public string? Moneda { get; set; }
+    public List<TotalImpuestoRequest> TotalConImpuestos { get; set; }
+    public string Motivo { get; set; }
+}
+
+public class DetalleNotaCreditoRequest
+{
+    public string? CodigoInterno { get; set; }
+    public string? CodigoAdicional { get; set; }
+    public string Descripcion { get; set; }
+    public decimal Cantidad { get; set; }
+    public decimal PrecioUnitario { get; set; }
+    public decimal? Descuento { get; set; }
+    public decimal PrecioTotalSinImpuesto { get; set; }
+
+    public List<DetAdicionalRequest>? DetallesAdicionales { get; set; }
+    public List<ImpuestoRequest> Impuestos { get; set; }
+}
+
+public class DetAdicionalRequest
+{
+    public string Nombre { get; set; }
+    public string Valor { get; set; }
 }

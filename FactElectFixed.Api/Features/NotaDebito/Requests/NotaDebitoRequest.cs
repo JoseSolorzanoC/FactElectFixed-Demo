@@ -1,6 +1,7 @@
 ﻿using FactElectFixed.Api.Features.NotaDebito.Xml;
 using FactElectFixed.Api.Helpers.Interfaces;
 using FactElectFixed.Api.Helpers.Models;
+using FactElectFixed.Api.Requests;
 using Infoware.SRI.Core.Enumerados;
 using Infoware.SRI.Modelos;
 using Infoware.SRI.Modelos.Enumerados;
@@ -10,77 +11,75 @@ namespace FactElectFixed.Api.Features.NotaDebito.Requests;
 
 public class NotaDebitoRequest : IDocumentoElectronicoNoDetalles<NotaDebitoXmlModel>
 {
-    public InfoNotaDebito InfoNotaDebito { get; set; }
-    public List<Motivo> Motivos { get; set; }
-    public List<CampoAdicional> InfoAdicional { get; set; }
-    public Api.Requests.InfoTributaria InfoTributaria { get; set; }
+    public InfoNotaDebitoRequest InfoNotaDebitoRequest { get; set; }
+    public List<MotivoRequest> Motivos { get; set; }
+    public List<CampoAdicionalRequest> InfoAdicional { get; set; }
+    public InfoTributariaRequest InfoTributariaRequest { get; set; }
+
     public NotaDebitoXmlModel ToXml(EnumTipoAmbiente tipoAmbiente, string version)
     {
         return new NotaDebitoXmlModel
         {
             Version = version,
-
-            InfoTributaria = new InfoTributaria
+            InfoTributariaXml = new InfoTributariaXml
             {
 #pragma warning disable CA1305
 #pragma warning disable S6562
-                Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(validInDate: new DateTime())),
+                Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(new DateTime())),
 #pragma warning restore S6562
 #pragma warning restore CA1305
-                TipoEmision = InfoTributaria.TipoEmision,
-                RazonSocial = InfoTributaria.RazonSocial,
-                NombreComercial = InfoTributaria.NombreComercial,
-                Ruc = InfoTributaria.Ruc,
-
+                TipoEmision = InfoTributariaRequest.TipoEmision,
+                RazonSocial = InfoTributariaRequest.RazonSocial,
+                NombreComercial = InfoTributariaRequest.NombreComercial,
+                Ruc = InfoTributariaRequest.Ruc,
                 ClaveAcceso = Utils.GenerarClaveAcceso(
                     EnumTipoDocumento.NotaDebito,
-                    InfoNotaDebito.FechaEmision,
+                    InfoNotaDebitoRequest.FechaEmision,
                     new PuntoEmision
                     {
 #pragma warning disable CA1305
-                        Codigo = int.Parse(InfoTributaria.PtoEmi),
+                        Codigo = int.Parse(InfoTributariaRequest.PtoEmi),
 #pragma warning restore CA1305
                         Establecimiento = new Establecimiento
                         {
 #pragma warning disable CA1305
-                            Codigo = int.Parse(InfoTributaria.Estab),
+                            Codigo = int.Parse(InfoTributariaRequest.Estab),
 #pragma warning restore CA1305
                             Emisor = new Emisor
                             {
-                                RUC = InfoTributaria.Ruc,
+                                RUC = InfoTributariaRequest.Ruc,
                                 EnumTipoAmbiente = tipoAmbiente
                             }
                         }
                     },
 #pragma warning disable CA1305
-                    long.Parse(InfoTributaria.Secuencial),
+                    long.Parse(InfoTributariaRequest.Secuencial),
 #pragma warning restore CA1305
                     EnumTipoEmision.Normal
                 ),
 
-                CodDoc = InfoTributaria.CodDoc,
-                Estab = InfoTributaria.Estab,
-                PtoEmi = InfoTributaria.PtoEmi,
-                Secuencial = InfoTributaria.Secuencial,
-                DirMatriz = InfoTributaria.DirMatriz
+                CodDoc = InfoTributariaRequest.CodDoc,
+                Estab = InfoTributariaRequest.Estab,
+                PtoEmi = InfoTributariaRequest.PtoEmi,
+                Secuencial = InfoTributariaRequest.Secuencial,
+                DirMatriz = InfoTributariaRequest.DirMatriz
             },
-
-            InfoNotaDebito = new Xml.InfoNotaDebito
+            InfoNotaDebitoXml = new InfoNotaDebitoXml
             {
-                FechaEmision = InfoNotaDebito.FechaEmision,
-                DirEstablecimiento = InfoNotaDebito.DirEstablecimiento,
-                TipoIdentificacionComprador = InfoNotaDebito.TipoIdentificacionComprador,
-                RazonSocialComprador = InfoNotaDebito.RazonSocialComprador,
-                IdentificacionComprador = InfoNotaDebito.IdentificacionComprador,
-                ContribuyenteEspecial = InfoNotaDebito.ContribuyenteEspecial,
-                ObligadoContabilidad = InfoNotaDebito.ObligadoContabilidad,
-                CodDocModificado = InfoNotaDebito.CodDocModificado,
-                NumDocModificado = InfoNotaDebito.NumDocModificado,
-                FechaEmisionDocSustento = InfoNotaDebito.FechaEmisionDocSustento,
-                TotalSinImpuestos = InfoNotaDebito.TotalSinImpuestos,
-                ValorTotal = InfoNotaDebito.ValorTotal,
+                FechaEmision = InfoNotaDebitoRequest.FechaEmision,
+                DirEstablecimiento = InfoNotaDebitoRequest.DirEstablecimiento,
+                TipoIdentificacionComprador = InfoNotaDebitoRequest.TipoIdentificacionComprador,
+                RazonSocialComprador = InfoNotaDebitoRequest.RazonSocialComprador,
+                IdentificacionComprador = InfoNotaDebitoRequest.IdentificacionComprador,
+                ContribuyenteEspecial = InfoNotaDebitoRequest.ContribuyenteEspecial,
+                ObligadoContabilidad = InfoNotaDebitoRequest.ObligadoContabilidad,
+                CodDocModificado = InfoNotaDebitoRequest.CodDocModificado,
+                NumDocModificado = InfoNotaDebitoRequest.NumDocModificado,
+                FechaEmisionDocSustento = InfoNotaDebitoRequest.FechaEmisionDocSustento,
+                TotalSinImpuestos = InfoNotaDebitoRequest.TotalSinImpuestos,
+                ValorTotal = InfoNotaDebitoRequest.ValorTotal,
 
-                Impuestos = InfoNotaDebito.Impuestos?.Select(i => new Impuesto
+                Impuestos = InfoNotaDebitoRequest.Impuestos?.Select(i => new ImpuestoXml
                 {
                     Codigo = i.Codigo,
                     CodigoPorcentaje = i.CodigoPorcentaje,
@@ -88,8 +87,7 @@ public class NotaDebitoRequest : IDocumentoElectronicoNoDetalles<NotaDebitoXmlMo
                     BaseImponible = i.BaseImponible,
                     Valor = i.Valor
                 }).ToList(),
-
-                Pagos = InfoNotaDebito.Pagos?.Select(p => new Pago
+                Pagos = InfoNotaDebitoRequest.Pagos?.Select(p => new PagoXml
                 {
                     FormaPago = p.FormaPago,
                     Total = p.Total,
@@ -97,14 +95,12 @@ public class NotaDebitoRequest : IDocumentoElectronicoNoDetalles<NotaDebitoXmlMo
                     UnidadTiempo = p.UnidadTiempo
                 }).ToList()
             },
-
-            Motivos = Motivos?.Select(m => new Motivo
+            Motivos = Motivos?.Select(m => new MotivoRequest
             {
                 Razon = m.Razon,
                 Valor = m.Valor
             }).ToList(),
-
-            InfoAdicional = InfoAdicional?.Select(a => new CampoAdicional
+            InfoAdicional = InfoAdicional?.Select(a => new CampoAdicionalXml
             {
                 Nombre = a.Nombre,
                 Valor = a.Valor
@@ -113,7 +109,7 @@ public class NotaDebitoRequest : IDocumentoElectronicoNoDetalles<NotaDebitoXmlMo
     }
 }
 
-public class InfoNotaDebito
+public class InfoNotaDebitoRequest
 {
     public DateTime FechaEmision { get; set; }
     public string DirEstablecimiento { get; set; }
@@ -126,19 +122,13 @@ public class InfoNotaDebito
     public string NumDocModificado { get; set; }
     public string FechaEmisionDocSustento { get; set; }
     public decimal TotalSinImpuestos { get; set; }
-    public List<Api.Requests.Impuesto> Impuestos { get; set; }
+    public List<ImpuestoRequest> Impuestos { get; set; }
     public decimal ValorTotal { get; set; }
-    public List<Api.Requests.Pago> Pagos { get; set; }
+    public List<PagoRequest> Pagos { get; set; }
 }
 
-public class Motivo
+public class MotivoRequest
 {
     public string Razon { get; set; }
     public decimal Valor { get; set; }
-}
-
-public class CampoAdicional
-{
-    public string Nombre { get; set; }
-    public string Valor { get; set; }
 }

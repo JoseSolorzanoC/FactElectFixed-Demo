@@ -44,8 +44,4 @@
         <PackageReference Include="ZiggyCreatures.FusionCache"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Files\1207245927001\DocumentosAutorizados\"/>
-    </ItemGroup>
-
 </Project>
