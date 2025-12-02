@@ -6,14 +6,9 @@ namespace FactElectFixed.Api.Features.Retencion.Xml;
 [XmlRoot("comprobanteRetencion")]
 public class RetencionXmlModel : IDocumentoXmlModel
 {
-    [XmlAttribute("id")]
-    public string Id { get; set; } = "comprobante";
+    [XmlAttribute("id")] public string Id { get; set; } = "comprobante";
 
-    [XmlAttribute("version")]
-    public string Version { get; set; }
-
-    [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributariaXml InfoTributariaXml { get; set; }
+    [XmlAttribute("version")] public string Version { get; set; }
 
     [XmlElement("infoCompRetencion", Order = 2)]
     public InfoCompRetencionXml InfoCompRetencion { get; set; }
@@ -25,6 +20,9 @@ public class RetencionXmlModel : IDocumentoXmlModel
     [XmlArray("infoAdicional", Order = 4)]
     [XmlArrayItem("campoAdicional")]
     public List<CampoAdicionalXml>? InfoAdicional { get; set; } = new();
+
+    [XmlElement("infoTributaria", Order = 1)]
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 }
 
 public class InfoCompRetencionXml
@@ -39,6 +37,7 @@ public class InfoCompRetencionXml
         set => FechaEmision = DateTime.ParseExact(value, "dd/MM/yyyy", null);
 #pragma warning restore S6580
     }
+
     [XmlIgnore] public DateTime FechaEmision { get; set; }
 
     [XmlElement("dirEstablecimiento", Order = 2)]
@@ -53,6 +52,7 @@ public class InfoCompRetencionXml
         get => ObligadoContabilidad ? "SI" : "NO";
         set => ObligadoContabilidad = value == "SI";
     }
+
     [XmlIgnore] public bool ObligadoContabilidad { get; set; }
 
     [XmlElement("tipoIdentificacionSujetoRetenido", Order = 5)]
@@ -61,8 +61,7 @@ public class InfoCompRetencionXml
     [XmlElement("tipoSujetoRetenido", Order = 6)]
     public string TipoSujetoRetenido { get; set; }
 
-    [XmlElement("parteRel", Order = 7)]
-    public string ParteRel { get; set; }
+    [XmlElement("parteRel", Order = 7)] public string ParteRel { get; set; }
 
     [XmlElement("razonSocialSujetoRetenido", Order = 8)]
     public string RazonSocialSujetoRetenido { get; set; }
@@ -76,8 +75,7 @@ public class InfoCompRetencionXml
 
 public class DocSustentoXml
 {
-    [XmlElement("codSustento", Order = 1)]
-    public string CodSustento { get; set; }
+    [XmlElement("codSustento", Order = 1)] public string CodSustento { get; set; }
 
     [XmlElement("codDocSustento", Order = 2)]
     public string CodDocSustento { get; set; }
@@ -95,6 +93,7 @@ public class DocSustentoXml
         set => FechaEmisionDocSustento = DateTime.ParseExact(value, "dd/MM/yyyy", null);
 #pragma warning restore S6580
     }
+
     [XmlIgnore] public DateTime FechaEmisionDocSustento { get; set; }
 
     [XmlElement("fechaRegistroContable", Order = 5)]
@@ -104,19 +103,19 @@ public class DocSustentoXml
         get => FechaRegistroContable.HasValue ? FechaRegistroContable.Value.ToString("dd/MM/yyyy") : null;
 #pragma warning restore CA1305
 #pragma warning disable S6580
-        set => FechaRegistroContable = string.IsNullOrWhiteSpace(value) ? (DateTime?)null : DateTime.ParseExact(value, "dd/MM/yyyy", null);
+        set => FechaRegistroContable =
+            string.IsNullOrWhiteSpace(value) ? null : DateTime.ParseExact(value, "dd/MM/yyyy", null);
 #pragma warning restore S6580
     }
+
     [XmlIgnore] public DateTime? FechaRegistroContable { get; set; }
 
     [XmlElement("numAutDocSustento", Order = 6)]
     public string NumAutDocSustento { get; set; }
 
-    [XmlElement("pagoLocExt", Order = 7)]
-    public string PagoLocExt { get; set; }
+    [XmlElement("pagoLocExt", Order = 7)] public string PagoLocExt { get; set; }
 
-    [XmlElement("tipoRegi", Order = 8)]
-    public string TipoRegi { get; set; }
+    [XmlElement("tipoRegi", Order = 8)] public string TipoRegi { get; set; }
 
     [XmlElement("paisEfecPago", Order = 9)]
     public string PaisEfecPago { get; set; }
@@ -127,8 +126,7 @@ public class DocSustentoXml
     [XmlElement("pagExtSujRetNorLeg", Order = 11)]
     public string PagExtSujRetNorLeg { get; set; }
 
-    [XmlElement("pagoRegFis", Order = 12)]
-    public string PagoRegFis { get; set; }
+    [XmlElement("pagoRegFis", Order = 12)] public string PagoRegFis { get; set; }
 
     [XmlElement("totalSinImpuestos", Order = 13)]
     public decimal TotalSinImpuestos { get; set; }
@@ -144,8 +142,7 @@ public class DocSustentoXml
     [XmlArrayItem("retencion")]
     public List<RetencionXml>? Retenciones { get; set; } = new();
 
-    [XmlElement("reembolsos", Order = 17)]
-    public ReembolsoDetalleXml? ReembolsoDetalle { get; set; }
+    [XmlElement("reembolsos", Order = 17)] public ReembolsoDetalleXml? ReembolsoDetalle { get; set; }
 
     [XmlArray("pagos", Order = 18)]
     [XmlArrayItem("pago")]
@@ -163,8 +160,7 @@ public class ImpuestoDocSustentoXml
     [XmlElement("baseImponible", Order = 3)]
     public decimal BaseImponible { get; set; }
 
-    [XmlElement("tarifa", Order = 4)]
-    public decimal Tarifa { get; set; }
+    [XmlElement("tarifa", Order = 4)] public decimal Tarifa { get; set; }
 
     [XmlElement("valorImpuesto", Order = 5)]
     public decimal ValorImpuesto { get; set; }
@@ -172,8 +168,7 @@ public class ImpuestoDocSustentoXml
 
 public class RetencionXml
 {
-    [XmlElement("codigo", Order = 1)]
-    public int Codigo { get; set; }
+    [XmlElement("codigo", Order = 1)] public int Codigo { get; set; }
 
     [XmlElement("codigoRetencion", Order = 2)]
     public string CodigoRetencion { get; set; }
@@ -229,14 +224,12 @@ public class ReembolsoDetalleXml
 
 public class DetalleImpuestoReembolsoXml
 {
-    [XmlElement("codigo", Order = 1)]
-    public int Codigo { get; set; }
+    [XmlElement("codigo", Order = 1)] public int Codigo { get; set; }
 
     [XmlElement("codigoPorcentaje", Order = 2)]
     public int CodigoPorcentaje { get; set; }
 
-    [XmlElement("tarifa", Order = 3)]
-    public decimal Tarifa { get; set; }
+    [XmlElement("tarifa", Order = 3)] public decimal Tarifa { get; set; }
 
     [XmlElement("baseImponibleReembolso", Order = 4)]
     public decimal BaseImponibleReembolso { get; set; }
@@ -247,9 +240,7 @@ public class DetalleImpuestoReembolsoXml
 
 public class PagoXml
 {
-    [XmlElement("formaPago", Order = 1)]
-    public string FormaPago { get; set; }
+    [XmlElement("formaPago", Order = 1)] public string FormaPago { get; set; }
 
-    [XmlElement("total", Order = 2)]
-    public decimal Total { get; set; }
+    [XmlElement("total", Order = 2)] public decimal Total { get; set; }
 }

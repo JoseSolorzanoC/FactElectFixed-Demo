@@ -1,5 +1,4 @@
-﻿using FactElectFixed.Api.Features.Factura.Requests;
-using FactElectFixed.Api.Features.NotaCredito.Requests;
+﻿using FactElectFixed.Api.Features.NotaCredito.Requests;
 using FactElectFixed.Api.Features.NotaCredito.Xml;
 using FactElectFixed.Api.Requests;
 using FactElectFixed.Api.Responses;
@@ -21,7 +20,8 @@ public class FirmarNotaCreditoEndpoint(IFirmarDocumentoService documentoService)
     public override async Task<Results<Ok<FirmarDocumentoResponse>, ProblemDetails>> ExecuteAsync(
         FirmarDocumentoRequest<NotaCreditoRequest> req, CancellationToken ct)
     {
-        FirmarDocumentoResponse enviarDocumentoSriResponse = await documentoService.EnviarDocumentoSri<NotaCreditoRequest, NotaCreditoXmlModel>(req);
+        FirmarDocumentoResponse enviarDocumentoSriResponse =
+            await documentoService.EnviarDocumentoSri<NotaCreditoRequest, NotaCreditoXmlModel>(req);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }

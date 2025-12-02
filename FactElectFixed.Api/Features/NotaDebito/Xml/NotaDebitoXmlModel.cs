@@ -6,34 +6,30 @@ namespace FactElectFixed.Api.Features.NotaDebito.Xml;
 [XmlRoot("notaDebito")]
 public class NotaDebitoXmlModel : IDocumentoXmlModel
 {
-    [XmlAttribute("version")]
-    public string Version { get; set; }
+    [XmlAttribute("version")] public string Version { get; set; }
 
-    [XmlAttribute("id")]
-    public string Id { get; set; } = "comprobante";
-
-    [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributariaXml InfoTributariaXml { get; set; }
+    [XmlAttribute("id")] public string Id { get; set; } = "comprobante";
 
     [XmlElement("infoNotaDebito", Order = 2)]
     public InfoNotaDebitoXml InfoNotaDebitoXml { get; set; }
 
     [XmlArray("motivos", Order = 3)]
     [XmlArrayItem("motivo")]
-    public List<Requests.MotivoRequest>? Motivos { get; set; }
+    public List<MotivoXml>? Motivos { get; set; }
 
     [XmlArray("infoAdicional", Order = 4)]
     [XmlArrayItem("campoAdicional")]
     public List<CampoAdicionalXml>? InfoAdicional { get; set; }
+
+    [XmlElement("infoTributaria", Order = 1)]
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 }
 
 public class MotivoXml
 {
-    [XmlElement("razon", Order = 1)]
-    public string Razon { get; set; }
+    [XmlElement("razon", Order = 1)] public string Razon { get; set; }
 
-    [XmlElement("valor", Order = 2)]
-    public decimal Valor { get; set; }
+    [XmlElement("valor", Order = 2)] public decimal Valor { get; set; }
 }
 
 public class InfoNotaDebitoXml
@@ -48,6 +44,7 @@ public class InfoNotaDebitoXml
         set => FechaEmision = DateTime.ParseExact(value, "dd/MM/yyyy", null);
 #pragma warning restore S6580
     }
+
     [XmlIgnore] public DateTime FechaEmision { get; set; }
 
     [XmlElement("dirEstablecimiento", Order = 2)]
@@ -71,6 +68,7 @@ public class InfoNotaDebitoXml
         get => ObligadoContabilidad ? "SI" : "NO";
         set => ObligadoContabilidad = value == "SI";
     }
+
     [XmlIgnore] public bool ObligadoContabilidad { get; set; }
 
     [XmlElement("codDocModificado", Order = 8)]
@@ -80,7 +78,17 @@ public class InfoNotaDebitoXml
     public string NumDocModificado { get; set; }
 
     [XmlElement("fechaEmisionDocSustento", Order = 10)]
-    public string FechaEmisionDocSustento { get; set; }
+    public string FechaEmisionDocSustentoString
+    {
+#pragma warning disable CA1305
+        get => FechaEmisionDocSustento.ToString("dd/MM/yyyy");
+#pragma warning restore CA1305
+#pragma warning disable S6580
+        set => FechaEmisionDocSustento = DateTime.ParseExact(value, "dd/MM/yyyy", null);
+#pragma warning restore S6580
+    }
+
+    [XmlIgnore] public DateTime FechaEmisionDocSustento { get; set; }
 
     [XmlElement("totalSinImpuestos", Order = 11)]
     public decimal TotalSinImpuestos { get; set; }
@@ -89,8 +97,7 @@ public class InfoNotaDebitoXml
     [XmlArrayItem("impuesto")]
     public List<ImpuestoXml>? Impuestos { get; set; }
 
-    [XmlElement("valorTotal", Order = 13)]
-    public decimal ValorTotal { get; set; }
+    [XmlElement("valorTotal", Order = 13)] public decimal ValorTotal { get; set; }
 
     [XmlArray("pagos", Order = 14)]
     [XmlArrayItem("pago")]

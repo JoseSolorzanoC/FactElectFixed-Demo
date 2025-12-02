@@ -8,6 +8,10 @@ namespace FactElectFixed.Api.Services.FirmarDocumento;
 
 public interface IFirmarDocumentoService
 {
-    Task<FirmarDocumentoResponse> EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest) where TRequest : IDocumentoElectronicoBase<TXmlModel> where TXmlModel : class, IDocumentoXmlModel;
-    Task<FirmarDocumentoResponse> VerificarDocumentoSri(string claveAcceso, string xmlDocumentoFirmado, EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados);
+    Task<FirmarDocumentoResponse>
+        EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest)
+        where TRequest : IDocumentoElectronicoBase<TXmlModel> where TXmlModel : class, IDocumentoXmlModel;
+
+    Task<FirmarDocumentoResponse> VerificarDocumentoSri(string claveAcceso, string xmlDocumentoFirmado,
+        EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados);
 }

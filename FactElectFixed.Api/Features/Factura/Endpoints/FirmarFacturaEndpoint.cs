@@ -20,7 +20,8 @@ public class FirmarFacturaEndpoint(IFirmarDocumentoService documentoService)
     public override async Task<Results<Ok<FirmarDocumentoResponse>, ProblemDetails>> ExecuteAsync(
         FirmarDocumentoRequest<FacturaRequest> req, CancellationToken ct)
     {
-        FirmarDocumentoResponse enviarDocumentoSriResponse = await documentoService.EnviarDocumentoSri<FacturaRequest, FacturaXmlModel>(req);
+        FirmarDocumentoResponse enviarDocumentoSriResponse =
+            await documentoService.EnviarDocumentoSri<FacturaRequest, FacturaXmlModel>(req);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }

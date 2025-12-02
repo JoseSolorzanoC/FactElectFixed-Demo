@@ -11,7 +11,8 @@ public class NotaCreditoValidator : Validator<FirmarDocumentoRequest<NotaCredito
 {
     public NotaCreditoValidator(IValidator<NotaCreditoRequest> comprobanteValidator,
 #pragma warning disable IDE0060
-        IValidator<InfoNotaCreditoRequest> infoNotaCreditoValidator, IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<InfoNotaCreditoRequest> infoNotaCreditoValidator,
+        IValidator<InfoTributariaRequest> infoTributariaValidator,
         IValidator<DetalleRequest> detalleValidator)
 #pragma warning restore IDE0060
     {
@@ -47,9 +48,9 @@ public class DetalleNotaCreditoValidator : Validator<DetalleNotaCreditoRequest>
 {
     public DetalleNotaCreditoValidator(
         IValidator<DetAdicionalRequest> detAdicionalValidator, IValidator<ImpuestoRequest> impuestoValidator
-        )
+    )
     {
-         RuleFor(x => x.CodigoInterno)
+        RuleFor(x => x.CodigoInterno)
             .MaximumLength(25);
 
         RuleFor(x => x.CodigoAdicional)

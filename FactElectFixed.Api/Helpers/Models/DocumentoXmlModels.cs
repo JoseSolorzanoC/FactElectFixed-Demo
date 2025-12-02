@@ -102,11 +102,9 @@ public class RubroXml
 
 public class CampoAdicionalXml
 {
-    [XmlAttribute("nombre")]
-    public string Nombre { get; set; }
+    [XmlAttribute("nombre")] public string Nombre { get; set; }
 
-    [XmlText]
-    public string Valor { get; set; }
+    [XmlText] public string Valor { get; set; }
 }
 
 public interface IDocumentoXmlModel

@@ -132,7 +132,7 @@ public class ConfiguracionService(
         await dbContext.Configuraciones.AddAsync(configuracion, ct);
 
         await dbContext.SaveChangesAsync(ct);
-        
+
         await fusionCache.RemoveAsync(configuracion.RucEmpresa, token: ct);
     }
 

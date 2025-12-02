@@ -2,7 +2,6 @@
 
 namespace FactElectFixed.Api.Helpers.Interfaces;
 
-
 public interface IDocumentoElectronicoBase<out T> : IXmlSerializable<T> where T : class
 {
     InfoTributariaRequest InfoTributariaRequest { get; set; }

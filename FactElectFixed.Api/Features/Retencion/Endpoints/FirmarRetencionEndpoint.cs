@@ -1,6 +1,4 @@
-﻿using FactElectFixed.Api.Features.NotaDebito.Requests;
-using FactElectFixed.Api.Features.NotaDebito.Xml;
-using FactElectFixed.Api.Features.Retencion.Requests;
+﻿using FactElectFixed.Api.Features.Retencion.Requests;
 using FactElectFixed.Api.Features.Retencion.Xml;
 using FactElectFixed.Api.Requests;
 using FactElectFixed.Api.Responses;
@@ -22,7 +20,8 @@ public class FirmarRetencionEndpoint(IFirmarDocumentoService documentoService)
     public override async Task<Results<Ok<FirmarDocumentoResponse>, ProblemDetails>> ExecuteAsync(
         FirmarDocumentoRequest<RetencionRequest> req, CancellationToken ct)
     {
-        FirmarDocumentoResponse enviarDocumentoSriResponse = await documentoService.EnviarDocumentoSri<RetencionRequest, RetencionXmlModel>(req);
+        FirmarDocumentoResponse enviarDocumentoSriResponse =
+            await documentoService.EnviarDocumentoSri<RetencionRequest, RetencionXmlModel>(req);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }

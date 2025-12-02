@@ -10,7 +10,8 @@ public class NotaDebitoValidator : Validator<FirmarDocumentoRequest<NotaDebitoRe
 {
     public NotaDebitoValidator(IValidator<NotaDebitoRequest> comprobanteValidator,
 #pragma warning disable IDE0060
-        IValidator<InfoNotaDebitoRequest> infoNotaCreditoValidator, IValidator<InfoTributariaRequest> infoTributariaValidator,
+        IValidator<InfoNotaDebitoRequest> infoNotaCreditoValidator,
+        IValidator<InfoTributariaRequest> infoTributariaValidator,
         IValidator<DetalleRequest> detalleValidator)
 #pragma warning restore IDE0060
     {
@@ -84,11 +85,12 @@ public class InfoNotaDebitoValidator : Validator<InfoNotaDebitoRequest>
 
         RuleFor(x => x.NumDocModificado)
             .NotEmpty().WithMessage("El campo 'NumDocModificado' es obligatorio.")
-            .MaximumLength(15).WithMessage("El campo 'NumDocModificado' no puede tener más de 15 caracteres.");
+            .MaximumLength(17).WithMessage("El campo 'NumDocModificado' no puede tener más de 17 caracteres.");
 
         RuleFor(x => x.FechaEmisionDocSustento)
             .NotEmpty().WithMessage("El campo 'FechaEmisionDocSustento' es obligatorio.")
-            .MaximumLength(10).WithMessage("El campo 'FechaEmisionDocSustento' no puede exceder 10 caracteres.");
+            .LessThanOrEqualTo(DateTime.Today)
+            .WithMessage("El campo 'FechaEmisionDocSustento' no puede ser una fecha futura.");
 
         RuleFor(x => x.TotalSinImpuestos)
             .InclusiveBetween(0, 999999999999.99M)

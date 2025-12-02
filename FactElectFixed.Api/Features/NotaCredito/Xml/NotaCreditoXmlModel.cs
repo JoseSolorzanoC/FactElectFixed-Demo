@@ -10,18 +10,19 @@ public class NotaCreditoXmlModel : IDocumentoXmlModel
 
     [XmlAttribute("version")] public string Version { get; set; } = "2.1.0";
 
-    [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributariaXml InfoTributariaXml { get; set; }
-
-    [XmlElement("infoNotaCredito", Order = 2)] public InfoNotaCreditoXml InfoNotaCreditoXml { get; set; }
+    [XmlElement("infoNotaCredito", Order = 2)]
+    public InfoNotaCreditoXml InfoNotaCreditoXml { get; set; }
 
     [XmlArray("detalles", Order = 3)]
     [XmlArrayItem("detalle")]
     public List<DetalleNotaCreditoXml> Detalles { get; set; }
-    
-    [XmlArray("infoAdicional")]
+
+    [XmlArray("infoAdicional", Order = 4)]
     [XmlArrayItem("campoAdicional")]
     public List<CampoAdicionalXml> InfoAdicional { get; set; }
+
+    [XmlElement("infoTributaria", Order = 1)]
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 }
 
 public class InfoNotaCreditoXml
@@ -63,8 +64,7 @@ public class InfoNotaCreditoXml
 
     [XmlIgnore] public bool ObligadoContabilidad { get; set; }
 
-    [XmlElement("rise", Order = 8)]
-    public string? Rise { get; set; }
+    [XmlElement("rise", Order = 8)] public string? Rise { get; set; }
 
     [XmlElement("codDocModificado", Order = 9)]
     public string CodDocModificado { get; set; }
@@ -91,39 +91,30 @@ public class InfoNotaCreditoXml
     [XmlElement("valorModificacion", Order = 13)]
     public decimal ValorModificacion { get; set; }
 
-    [XmlElement("moneda", Order = 14)]
-    public string? Moneda { get; set; }
+    [XmlElement("moneda", Order = 14)] public string? Moneda { get; set; }
 
     [XmlArray("totalConImpuestos", Order = 15)]
     [XmlArrayItem("totalImpuesto")]
     public List<TotalImpuestoXml> TotalConImpuestos { get; set; } = new();
 
-    [XmlElement("motivo", Order = 16)]
-    public string Motivo { get; set; }
+    [XmlElement("motivo", Order = 16)] public string Motivo { get; set; }
 }
 
 public class DetalleNotaCreditoXml
 {
-    [XmlElement("codigoInterno")]
-    public string? CodigoInterno { get; set; } 
+    [XmlElement("codigoInterno")] public string? CodigoInterno { get; set; }
 
-    [XmlElement("codigoAdicional")]
-    public string? CodigoAdicional { get; set; }
+    [XmlElement("codigoAdicional")] public string? CodigoAdicional { get; set; }
 
-    [XmlElement("descripcion")]
-    public string Descripcion { get; set; }
+    [XmlElement("descripcion")] public string Descripcion { get; set; }
 
-    [XmlElement("cantidad")]
-    public decimal Cantidad { get; set; }
+    [XmlElement("cantidad")] public decimal Cantidad { get; set; }
 
-    [XmlElement("precioUnitario")]
-    public decimal PrecioUnitario { get; set; }
+    [XmlElement("precioUnitario")] public decimal PrecioUnitario { get; set; }
 
-    [XmlElement("descuento")]
-    public decimal Descuento { get; set; }
+    [XmlElement("descuento")] public decimal Descuento { get; set; }
 
-    [XmlElement("precioTotalSinImpuesto")]
-    public decimal PrecioTotalSinImpuesto { get; set; }
+    [XmlElement("precioTotalSinImpuesto")] public decimal PrecioTotalSinImpuesto { get; set; }
 
     [XmlArray("detallesAdicionales")]
     [XmlArrayItem("detalleAdicional")]
@@ -136,9 +127,7 @@ public class DetalleNotaCreditoXml
 
 public class DetAdicionalXml
 {
-    [XmlAttribute("nombre")]
-    public string Nombre { get; set; }
+    [XmlAttribute("nombre")] public string Nombre { get; set; }
 
-    [XmlAttribute("valor")]
-    public string Valor { get; set; }
+    [XmlAttribute("valor")] public string Valor { get; set; }
 }

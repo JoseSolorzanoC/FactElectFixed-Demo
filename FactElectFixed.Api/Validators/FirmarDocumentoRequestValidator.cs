@@ -24,7 +24,7 @@ public class FirmarDocumentoRequestValidator<T> : Validator<FirmarDocumentoReque
 
         RuleForEach(x => x.Comprobantes)
             .SetValidator(comprobanteValidator);
-    } 
+    }
 }
 
 public class InfoTributariaValidator : Validator<InfoTributariaRequest>

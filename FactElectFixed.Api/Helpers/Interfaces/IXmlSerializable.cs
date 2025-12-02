@@ -4,5 +4,5 @@ namespace FactElectFixed.Api.Helpers.Interfaces;
 
 public interface IXmlSerializable<out TResult>
 {
-   TResult ToXml(EnumTipoAmbiente tipoAmbiente, string version); 
+    TResult ToXml(EnumTipoAmbiente tipoAmbiente, string version);
 }

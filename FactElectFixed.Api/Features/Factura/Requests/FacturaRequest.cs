@@ -20,7 +20,7 @@ public class FacturaRequest : IDocumentoElectronico<FacturaXmlModel>
         return new FacturaXmlModel
         {
             Version = version,
-            InfoTributariaXml = new Helpers.Models.InfoTributariaXml
+            InfoTributariaXml = new InfoTributariaXml
             {
 #pragma warning disable CA1305
 #pragma warning disable S6562
@@ -50,7 +50,7 @@ public class FacturaRequest : IDocumentoElectronico<FacturaXmlModel>
                 Secuencial = InfoTributariaRequest.Secuencial,
                 DirMatriz = InfoTributariaRequest.DirMatriz
             },
-            InfoFacturaXml = new Xml.InfoFacturaXml
+            InfoFacturaXml = new InfoFacturaXml
             {
                 FechaEmision = InfoFactura.FechaEmision,
                 DirEstablecimiento = InfoFactura.DirEstablecimiento,
@@ -62,7 +62,7 @@ public class FacturaRequest : IDocumentoElectronico<FacturaXmlModel>
                 DireccionComprador = InfoFactura.DireccionComprador,
                 TotalSinImpuestos = InfoFactura.TotalSinImpuestos,
                 TotalDescuento = InfoFactura.TotalDescuento,
-                TotalConImpuestos = InfoFactura.TotalConImpuestos.Select(i => new Helpers.Models.TotalImpuestoXml
+                TotalConImpuestos = InfoFactura.TotalConImpuestos.Select(i => new TotalImpuestoXml
                 {
                     Codigo = i.Codigo,
                     CodigoPorcentaje = i.CodigoPorcentaje,
@@ -72,7 +72,7 @@ public class FacturaRequest : IDocumentoElectronico<FacturaXmlModel>
                 Propina = InfoFactura.Propina,
                 ImporteTotal = InfoFactura.ImporteTotal,
                 Moneda = InfoFactura.Moneda,
-                Pagos = InfoFactura.Pagos.Select(p => new Helpers.Models.PagoXml
+                Pagos = InfoFactura.Pagos.Select(p => new PagoXml
                 {
                     FormaPago = p.FormaPago,
                     Total = p.Total,
@@ -82,7 +82,7 @@ public class FacturaRequest : IDocumentoElectronico<FacturaXmlModel>
                 ValorRetIva = InfoFactura.ValorRetIva,
                 ValorRetRenta = InfoFactura.ValorRetRenta
             },
-            Detalles = Detalles.Select(d => new Helpers.Models.DetalleXml
+            Detalles = Detalles.Select(d => new DetalleXml
             {
                 CodigoPrincipal = d.CodigoPrincipal,
                 CodigoAuxiliar = d.CodigoAuxiliar,

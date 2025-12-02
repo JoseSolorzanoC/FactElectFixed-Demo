@@ -1,5 +1,4 @@
-﻿using FactElectFixed.Api.Features.NotaCredito.Requests;
-using FastEndpoints;
+﻿using FastEndpoints;
 using Infoware.SRI.Core.Enumerados;
 
 namespace FactElectFixed.Api.Requests;

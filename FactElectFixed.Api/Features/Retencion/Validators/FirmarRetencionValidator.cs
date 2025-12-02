@@ -1,5 +1,4 @@
-﻿using FactElectFixed.Api.Features.NotaDebito.Requests;
-using FactElectFixed.Api.Features.Retencion.Requests;
+﻿using FactElectFixed.Api.Features.Retencion.Requests;
 using FactElectFixed.Api.Requests;
 using FactElectFixed.Api.Validators;
 using FastEndpoints;
@@ -78,7 +77,8 @@ public class InfoCompRetencionValidator : Validator<InfoCompRetencionRequest>
 
 public class DocSustentoValidator : Validator<DocSustentoRequest>
 {
-    public DocSustentoValidator(IValidator<ImpuestoDocSustentoRequest> impuestoValidator, IValidator<RetencionDetalleRequest> retencionValidator, IValidator<PagoRequest> pagoValidator)
+    public DocSustentoValidator(IValidator<ImpuestoDocSustentoRequest> impuestoValidator,
+        IValidator<RetencionDetalleRequest> retencionValidator, IValidator<PagoRequest> pagoValidator)
     {
         RuleFor(x => x.CodSustento)
             .NotEmpty().WithMessage("'CodSustento' es obligatorio.");

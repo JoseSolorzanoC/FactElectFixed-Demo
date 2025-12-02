@@ -20,8 +20,8 @@ public class FirmarNotaDebitoEndpoint(IFirmarDocumentoService documentoService)
     public override async Task<Results<Ok<FirmarDocumentoResponse>, ProblemDetails>> ExecuteAsync(
         FirmarDocumentoRequest<NotaDebitoRequest> req, CancellationToken ct)
     {
-        FirmarDocumentoResponse enviarDocumentoSriResponse = await documentoService.EnviarDocumentoSri<NotaDebitoRequest, NotaDebitoXmlModel>(req);
+        FirmarDocumentoResponse enviarDocumentoSriResponse =
+            await documentoService.EnviarDocumentoSri<NotaDebitoRequest, NotaDebitoXmlModel>(req);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }
-

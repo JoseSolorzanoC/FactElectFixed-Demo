@@ -15,6 +15,7 @@ public class NotaCreditoRequest : IDocumentoElectronicoNoDetalles<NotaCreditoXml
     public List<DetalleNotaCreditoRequest> Detalles { get; set; }
     public List<CampoAdicionalRequest> InfoAdicional { get; set; }
     public InfoTributariaRequest InfoTributariaRequest { get; set; }
+
     public NotaCreditoXmlModel ToXml(EnumTipoAmbiente tipoAmbiente, string version)
     {
         return new NotaCreditoXmlModel
@@ -67,43 +68,55 @@ public class NotaCreditoRequest : IDocumentoElectronicoNoDetalles<NotaCreditoXml
                 RazonSocialComprador = InfoNotaCreditoRequest.RazonSocialComprador,
                 IdentificacionComprador = InfoNotaCreditoRequest.IdentificacionComprador,
                 TotalSinImpuestos = InfoNotaCreditoRequest.TotalSinImpuestos,
-                TotalConImpuestos = [.. InfoNotaCreditoRequest.TotalConImpuestos.Select(i => new TotalImpuestoXml
-                {
-                    Codigo = i.Codigo,
-                    CodigoPorcentaje = i.CodigoPorcentaje,
-                    BaseImponible = i.BaseImponible,
-                    Valor = i.Valor
-                })],
+                TotalConImpuestos =
+                [
+                    .. InfoNotaCreditoRequest.TotalConImpuestos.Select(i => new TotalImpuestoXml
+                    {
+                        Codigo = i.Codigo,
+                        CodigoPorcentaje = i.CodigoPorcentaje,
+                        BaseImponible = i.BaseImponible,
+                        Valor = i.Valor
+                    })
+                ],
                 Moneda = InfoNotaCreditoRequest.Moneda
             },
-            Detalles = [.. Detalles.Select(d => new DetalleNotaCreditoXml
-            {
-                CodigoInterno = d.CodigoInterno,
-                CodigoAdicional = d.CodigoAdicional,
-                Descripcion = d.Descripcion,
-                Cantidad = d.Cantidad,
-                PrecioUnitario = d.PrecioUnitario,
-                Descuento = d.Descuento ?? 0,
-                PrecioTotalSinImpuesto = d.PrecioTotalSinImpuesto,
-                DetallesAdicionales = d.DetallesAdicionales?.Select(d => new DetAdicionalXml
+            Detalles =
+            [
+                .. Detalles.Select(d => new DetalleNotaCreditoXml
                 {
-                    Nombre = d.Nombre,
-                    Valor = d.Valor
-                }).ToList(),
-                Impuestos = [.. d.Impuestos.Select(i => new ImpuestoXml
+                    CodigoInterno = d.CodigoInterno,
+                    CodigoAdicional = d.CodigoAdicional,
+                    Descripcion = d.Descripcion,
+                    Cantidad = d.Cantidad,
+                    PrecioUnitario = d.PrecioUnitario,
+                    Descuento = d.Descuento ?? 0,
+                    PrecioTotalSinImpuesto = d.PrecioTotalSinImpuesto,
+                    DetallesAdicionales = d.DetallesAdicionales?.Select(d => new DetAdicionalXml
+                    {
+                        Nombre = d.Nombre,
+                        Valor = d.Valor
+                    }).ToList(),
+                    Impuestos =
+                    [
+                        .. d.Impuestos.Select(i => new ImpuestoXml
+                        {
+                            Codigo = i.Codigo,
+                            CodigoPorcentaje = i.CodigoPorcentaje,
+                            Tarifa = i.Tarifa,
+                            BaseImponible = i.BaseImponible,
+                            Valor = i.Valor
+                        })
+                    ]
+                })
+            ],
+            InfoAdicional =
+            [
+                .. InfoAdicional.Select(i => new CampoAdicionalXml
                 {
-                    Codigo = i.Codigo,
-                    CodigoPorcentaje = i.CodigoPorcentaje,
-                    Tarifa = i.Tarifa,
-                    BaseImponible = i.BaseImponible,
+                    Nombre = i.Nombre,
                     Valor = i.Valor
-                })]
-            })],
-            InfoAdicional = [.. InfoAdicional.Select(i => new CampoAdicionalXml
-            {
-                Nombre = i.Nombre,
-                Valor = i.Valor
-            })]
+                })
+            ]
         };
     }
 }

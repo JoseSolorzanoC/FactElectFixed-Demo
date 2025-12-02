@@ -95,7 +95,7 @@ public class NotaDebitoRequest : IDocumentoElectronicoNoDetalles<NotaDebitoXmlMo
                     UnidadTiempo = p.UnidadTiempo
                 }).ToList()
             },
-            Motivos = Motivos?.Select(m => new MotivoRequest
+            Motivos = Motivos?.Select(m => new MotivoXml
             {
                 Razon = m.Razon,
                 Valor = m.Valor
@@ -120,7 +120,7 @@ public class InfoNotaDebitoRequest
     public bool ObligadoContabilidad { get; set; }
     public string CodDocModificado { get; set; }
     public string NumDocModificado { get; set; }
-    public string FechaEmisionDocSustento { get; set; }
+    public DateTime FechaEmisionDocSustento { get; set; }
     public decimal TotalSinImpuestos { get; set; }
     public List<ImpuestoRequest> Impuestos { get; set; }
     public decimal ValorTotal { get; set; }

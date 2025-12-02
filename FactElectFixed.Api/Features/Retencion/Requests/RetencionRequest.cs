@@ -1,5 +1,4 @@
-﻿using FactElectFixed.Api.Features.NotaDebito.Requests;
-using FactElectFixed.Api.Features.Retencion.Xml;
+﻿using FactElectFixed.Api.Features.Retencion.Xml;
 using FactElectFixed.Api.Helpers.Interfaces;
 using FactElectFixed.Api.Helpers.Models;
 using FactElectFixed.Api.Requests;
@@ -13,133 +12,138 @@ namespace FactElectFixed.Api.Features.Retencion.Requests;
 
 public class RetencionRequest : IDocumentoElectronicoNoDetalles<RetencionXmlModel>
 {
-    public RetencionXmlModel ToXml(EnumTipoAmbiente tipoAmbiente, string version)
-    {
-return new RetencionXmlModel
-    {
-        Version = version,
-        InfoTributariaXml = new Api.Helpers.Models.InfoTributariaXml
-        {
-#pragma warning disable CA1305
-#pragma warning disable S6562
-            Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(validInDate: new DateTime())),
-#pragma warning restore S6562
-#pragma warning restore CA1305
-            TipoEmision = InfoTributariaRequest.TipoEmision,
-            RazonSocial = InfoTributariaRequest.RazonSocial,
-            NombreComercial = InfoTributariaRequest.NombreComercial,
-            Ruc = InfoTributariaRequest.Ruc,
-            ClaveAcceso = Utils.GenerarClaveAcceso(EnumTipoDocumento.ComprobanteRetencion,
-                InfoCompRetencionRequest.FechaEmision,
-                new PuntoEmision
-                {
-#pragma warning disable CA1305
-                    Codigo = int.Parse(InfoTributariaRequest.PtoEmi),
-#pragma warning restore CA1305
-                    Establecimiento = new Establecimiento
-                    {
-#pragma warning disable CA1305
-                        Codigo = int.Parse(InfoTributariaRequest.Estab),
-#pragma warning restore CA1305
-                        Emisor = new Emisor { RUC = InfoTributariaRequest.Ruc, EnumTipoAmbiente = tipoAmbiente }
-                    }
-                },
-#pragma warning disable CA1305
-                long.Parse(InfoTributariaRequest.Secuencial),
-#pragma warning restore CA1305
-                EnumTipoEmision.Normal),
-            CodDoc = InfoTributariaRequest.CodDoc,
-            Estab = InfoTributariaRequest.Estab,
-            PtoEmi = InfoTributariaRequest.PtoEmi,
-            Secuencial = InfoTributariaRequest.Secuencial,
-            DirMatriz = InfoTributariaRequest.DirMatriz
-        },
-
-        InfoCompRetencion = new InfoCompRetencionXml
-        {
-            FechaEmision = InfoCompRetencionRequest.FechaEmision,
-            DirEstablecimiento = InfoCompRetencionRequest.DirEstablecimiento,
-            ContribuyenteEspecial = InfoCompRetencionRequest.ContribuyenteEspecial,
-            ObligadoContabilidad = InfoCompRetencionRequest.ObligadoContabilidad ?? false,
-            TipoIdentificacionSujetoRetenido = InfoCompRetencionRequest.TipoIdentificacionSujetoRetenido,
-            TipoSujetoRetenido = InfoCompRetencionRequest.TipoSujetoRetenido,
-            ParteRel = InfoCompRetencionRequest.ParteRel,
-            RazonSocialSujetoRetenido = InfoCompRetencionRequest.RazonSocialSujetoRetenido,
-            IdentificacionSujetoRetenido = InfoCompRetencionRequest.IdentificacionSujetoRetenido,
-            PeriodoFiscal = InfoCompRetencionRequest.PeriodoFiscal
-        },
-
-        DocsSustento = DocsSustento?.Select(d => new DocSustentoXml
-        {
-            CodSustento = d.CodSustento,
-            CodDocSustento = d.CodDocSustento,
-            NumDocSustento = d.NumDocSustento,
-            FechaEmisionDocSustento = d.FechaEmisionDocSustento,
-            FechaRegistroContable = d.FechaRegistroContable,
-            NumAutDocSustento = d.NumAutDocSustento,
-            PagoLocExt = d.PagoLocExt,
-            TipoRegi = d.TipoRegi,
-            PaisEfecPago = d.PaisEfecPago,
-            AplicConvDobTrib = d.AplicConvDobTrib,
-            PagExtSujRetNorLeg = d.PagExtSujRetNorLeg,
-            PagoRegFis = d.PagoRegFis,
-            TotalSinImpuestos = d.TotalSinImpuestos,
-            ImporteTotal = d.ImporteTotal,
-            ImpuestosDocSustento = d.ImpuestosDocSustento?.Select(i => new ImpuestoDocSustentoXml
-            {
-                CodImpuestoDocSustento = i.CodImpuestoDocSustento,
-                CodigoPorcentaje = i.CodigoPorcentaje,
-                BaseImponible = i.BaseImponible,
-                Tarifa = i.Tarifa,
-                ValorImpuesto = i.ValorImpuesto
-            }).ToList(),
-            Retenciones = d.Retenciones?.Select(r => new RetencionXml
-            {
-                Codigo = r.Codigo,
-                CodigoRetencion = r.CodigoRetencion,
-                BaseImponible = r.BaseImponible,
-                PorcentajeRetener = r.PorcentajeRetener,
-                ValorRetenido = r.ValorRetenido
-            }).ToList(),
-            ReembolsoDetalle = d.ReembolsoDetalleRequest == null ? null : new ReembolsoDetalleXml
-            {
-                TipoIdentificacionProveedorReembolso = d.ReembolsoDetalleRequest.TipoIdentificacionProveedorReembolso,
-                IdentificacionProveedorReembolso = d.ReembolsoDetalleRequest.IdentificacionProveedorReembolso,
-                CodPaisPagoProveedorReembolso = d.ReembolsoDetalleRequest.CodPaisPagoProveedorReembolso,
-                TipoProveedorReembolso = d.ReembolsoDetalleRequest.TipoProveedorReembolso,
-                CodDocReembolso = d.ReembolsoDetalleRequest.CodDocReembolso,
-                EstabDocReembolso = d.ReembolsoDetalleRequest.EstabDocReembolso,
-                PtoEmiDocReembolso = d.ReembolsoDetalleRequest.PtoEmiDocReembolso,
-                SecuencialDocReembolso = d.ReembolsoDetalleRequest.SecuencialDocReembolso,
-                FechaEmisionDocReembolso = d.ReembolsoDetalleRequest.FechaEmisionDocReembolso,
-                NumeroAutorizacionDocReemb = d.ReembolsoDetalleRequest.NumeroAutorizacionDocReemb,
-                DetalleImpuestos = d.ReembolsoDetalleRequest.DetalleImpuestos?.Select(t => new DetalleImpuestoReembolsoXml
-                {
-                    Codigo = t.Codigo,
-                    CodigoPorcentaje = t.CodigoPorcentaje,
-                    Tarifa = t.Tarifa,
-                    BaseImponibleReembolso = t.BaseImponibleReembolso,
-                    ImpuestoReembolso = t.ImpuestoReembolso
-                }).ToList()
-            },
-            Pagos = d.Pagos?.Select(p => new PagoXml
-            {
-                FormaPago = p.FormaPago,
-                Total = p.Total
-            }).ToList()
-        }).ToList(),
-        InfoAdicional = InfoAdicional.Select(a => new CampoAdicionalXml
-        {
-            Nombre = a.Nombre,
-            Valor = a.Valor
-        }).ToList()
-    };
-    }
-
-    public InfoTributariaRequest InfoTributariaRequest { get; set; }
     public InfoCompRetencionRequest InfoCompRetencionRequest { get; set; }
     public List<DocSustentoRequest> DocsSustento { get; set; } = new();
     public List<CampoAdicionalRequest> InfoAdicional { get; set; } = new();
+
+    public RetencionXmlModel ToXml(EnumTipoAmbiente tipoAmbiente, string version)
+    {
+        return new RetencionXmlModel
+        {
+            Version = version,
+            InfoTributariaXml = new InfoTributariaXml
+            {
+#pragma warning disable CA1305
+#pragma warning disable S6562
+                Ambiente = Convert.ToInt32(tipoAmbiente.ObtenerSRICodigo(new DateTime())),
+#pragma warning restore S6562
+#pragma warning restore CA1305
+                TipoEmision = InfoTributariaRequest.TipoEmision,
+                RazonSocial = InfoTributariaRequest.RazonSocial,
+                NombreComercial = InfoTributariaRequest.NombreComercial,
+                Ruc = InfoTributariaRequest.Ruc,
+                ClaveAcceso = Utils.GenerarClaveAcceso(EnumTipoDocumento.ComprobanteRetencion,
+                    InfoCompRetencionRequest.FechaEmision,
+                    new PuntoEmision
+                    {
+#pragma warning disable CA1305
+                        Codigo = int.Parse(InfoTributariaRequest.PtoEmi),
+#pragma warning restore CA1305
+                        Establecimiento = new Establecimiento
+                        {
+#pragma warning disable CA1305
+                            Codigo = int.Parse(InfoTributariaRequest.Estab),
+#pragma warning restore CA1305
+                            Emisor = new Emisor { RUC = InfoTributariaRequest.Ruc, EnumTipoAmbiente = tipoAmbiente }
+                        }
+                    },
+#pragma warning disable CA1305
+                    long.Parse(InfoTributariaRequest.Secuencial),
+#pragma warning restore CA1305
+                    EnumTipoEmision.Normal),
+                CodDoc = InfoTributariaRequest.CodDoc,
+                Estab = InfoTributariaRequest.Estab,
+                PtoEmi = InfoTributariaRequest.PtoEmi,
+                Secuencial = InfoTributariaRequest.Secuencial,
+                DirMatriz = InfoTributariaRequest.DirMatriz
+            },
+
+            InfoCompRetencion = new InfoCompRetencionXml
+            {
+                FechaEmision = InfoCompRetencionRequest.FechaEmision,
+                DirEstablecimiento = InfoCompRetencionRequest.DirEstablecimiento,
+                ContribuyenteEspecial = InfoCompRetencionRequest.ContribuyenteEspecial,
+                ObligadoContabilidad = InfoCompRetencionRequest.ObligadoContabilidad ?? false,
+                TipoIdentificacionSujetoRetenido = InfoCompRetencionRequest.TipoIdentificacionSujetoRetenido,
+                TipoSujetoRetenido = InfoCompRetencionRequest.TipoSujetoRetenido,
+                ParteRel = InfoCompRetencionRequest.ParteRel,
+                RazonSocialSujetoRetenido = InfoCompRetencionRequest.RazonSocialSujetoRetenido,
+                IdentificacionSujetoRetenido = InfoCompRetencionRequest.IdentificacionSujetoRetenido,
+                PeriodoFiscal = InfoCompRetencionRequest.PeriodoFiscal
+            },
+
+            DocsSustento = DocsSustento?.Select(d => new DocSustentoXml
+            {
+                CodSustento = d.CodSustento,
+                CodDocSustento = d.CodDocSustento,
+                NumDocSustento = d.NumDocSustento,
+                FechaEmisionDocSustento = d.FechaEmisionDocSustento,
+                FechaRegistroContable = d.FechaRegistroContable,
+                NumAutDocSustento = d.NumAutDocSustento,
+                PagoLocExt = d.PagoLocExt,
+                TipoRegi = d.TipoRegi,
+                PaisEfecPago = d.PaisEfecPago,
+                AplicConvDobTrib = d.AplicConvDobTrib,
+                PagExtSujRetNorLeg = d.PagExtSujRetNorLeg,
+                PagoRegFis = d.PagoRegFis,
+                TotalSinImpuestos = d.TotalSinImpuestos,
+                ImporteTotal = d.ImporteTotal,
+                ImpuestosDocSustento = d.ImpuestosDocSustento?.Select(i => new ImpuestoDocSustentoXml
+                {
+                    CodImpuestoDocSustento = i.CodImpuestoDocSustento,
+                    CodigoPorcentaje = i.CodigoPorcentaje,
+                    BaseImponible = i.BaseImponible,
+                    Tarifa = i.Tarifa,
+                    ValorImpuesto = i.ValorImpuesto
+                }).ToList(),
+                Retenciones = d.Retenciones?.Select(r => new RetencionXml
+                {
+                    Codigo = r.Codigo,
+                    CodigoRetencion = r.CodigoRetencion,
+                    BaseImponible = r.BaseImponible,
+                    PorcentajeRetener = r.PorcentajeRetener,
+                    ValorRetenido = r.ValorRetenido
+                }).ToList(),
+                ReembolsoDetalle = d.ReembolsoDetalleRequest == null
+                    ? null
+                    : new ReembolsoDetalleXml
+                    {
+                        TipoIdentificacionProveedorReembolso =
+                            d.ReembolsoDetalleRequest.TipoIdentificacionProveedorReembolso,
+                        IdentificacionProveedorReembolso = d.ReembolsoDetalleRequest.IdentificacionProveedorReembolso,
+                        CodPaisPagoProveedorReembolso = d.ReembolsoDetalleRequest.CodPaisPagoProveedorReembolso,
+                        TipoProveedorReembolso = d.ReembolsoDetalleRequest.TipoProveedorReembolso,
+                        CodDocReembolso = d.ReembolsoDetalleRequest.CodDocReembolso,
+                        EstabDocReembolso = d.ReembolsoDetalleRequest.EstabDocReembolso,
+                        PtoEmiDocReembolso = d.ReembolsoDetalleRequest.PtoEmiDocReembolso,
+                        SecuencialDocReembolso = d.ReembolsoDetalleRequest.SecuencialDocReembolso,
+                        FechaEmisionDocReembolso = d.ReembolsoDetalleRequest.FechaEmisionDocReembolso,
+                        NumeroAutorizacionDocReemb = d.ReembolsoDetalleRequest.NumeroAutorizacionDocReemb,
+                        DetalleImpuestos = d.ReembolsoDetalleRequest.DetalleImpuestos?.Select(t =>
+                            new DetalleImpuestoReembolsoXml
+                            {
+                                Codigo = t.Codigo,
+                                CodigoPorcentaje = t.CodigoPorcentaje,
+                                Tarifa = t.Tarifa,
+                                BaseImponibleReembolso = t.BaseImponibleReembolso,
+                                ImpuestoReembolso = t.ImpuestoReembolso
+                            }).ToList()
+                    },
+                Pagos = d.Pagos?.Select(p => new PagoXml
+                {
+                    FormaPago = p.FormaPago,
+                    Total = p.Total
+                }).ToList()
+            }).ToList(),
+            InfoAdicional = InfoAdicional.Select(a => new CampoAdicionalXml
+            {
+                Nombre = a.Nombre,
+                Valor = a.Valor
+            }).ToList()
+        };
+    }
+
+    public InfoTributariaRequest InfoTributariaRequest { get; set; }
 }
 
 public class InfoCompRetencionRequest
@@ -153,7 +157,7 @@ public class InfoCompRetencionRequest
     public string ParteRel { get; set; }
     public string RazonSocialSujetoRetenido { get; set; }
     public string IdentificacionSujetoRetenido { get; set; }
-    public string PeriodoFiscal { get; set; } 
+    public string PeriodoFiscal { get; set; }
 }
 
 public class DocSustentoRequest
@@ -182,7 +186,7 @@ public class DocSustentoRequest
 
 public class ImpuestoDocSustentoRequest
 {
-    public int CodImpuestoDocSustento { get; set; } 
+    public int CodImpuestoDocSustento { get; set; }
     public int CodigoPorcentaje { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal Tarifa { get; set; }
@@ -222,4 +226,3 @@ public class DetalleImpuestoReembolsoRequest
     public decimal BaseImponibleReembolso { get; set; }
     public decimal ImpuestoReembolso { get; set; }
 }
-

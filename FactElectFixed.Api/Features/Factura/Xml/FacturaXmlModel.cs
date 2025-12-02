@@ -1,5 +1,4 @@
 ﻿using System.Xml.Serialization;
-using FactElectFixed.Api.Helpers.Interfaces;
 using FactElectFixed.Api.Helpers.Models;
 
 namespace FactElectFixed.Api.Features.Factura.Xml;
@@ -11,9 +10,6 @@ public class FacturaXmlModel : IDocumentoXmlModel
 
     [XmlAttribute("version")] public string Version { get; set; } = "2.1.0";
 
-    [XmlElement("infoTributaria", Order = 1)]
-    public InfoTributariaXml InfoTributariaXml { get; set; }
-
     [XmlElement("infoFactura", Order = 2)] public InfoFacturaXml InfoFacturaXml { get; set; }
 
     [XmlArray("detalles", Order = 3)]
@@ -23,6 +19,9 @@ public class FacturaXmlModel : IDocumentoXmlModel
     [XmlArray("otrosRubrosTerceros", Order = 4)]
     [XmlArrayItem("rubro")]
     public List<RubroXml>? OtrosRubrosTerceros { get; set; }
+
+    [XmlElement("infoTributaria", Order = 1)]
+    public InfoTributariaXml InfoTributariaXml { get; set; }
 }
 
 public class InfoFacturaXml

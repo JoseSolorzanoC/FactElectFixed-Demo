@@ -40,5 +40,8 @@ public static class ValidationHelpers
             DateTimeStyles.None, out _);
     }
 
-    public static bool IsDigitsOnly(string s) => !string.IsNullOrEmpty(s) && s.All(char.IsDigit);
+    public static bool IsDigitsOnly(string s)
+    {
+        return !string.IsNullOrEmpty(s) && s.All(char.IsDigit);
+    }
 }
