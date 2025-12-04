@@ -1,4 +1,5 @@
 ﻿using FactElectFixed.Api.Features.Retencion.Requests;
+using FactElectFixed.Api.Helpers;
 using FactElectFixed.Api.Requests;
 using FactElectFixed.Api.Validators;
 using FastEndpoints;
@@ -17,32 +18,28 @@ public class RetencionValidator : Validator<FirmarDocumentoRequest<RetencionRequ
 public class RetencionRequestValidator : Validator<RetencionRequest>
 {
     public RetencionRequestValidator(
-        IValidator<InfoCompRetencionRequest> infoCompRetencionValidator,
+        IValidator<InfoCompRetencion> infoCompRetencionValidator,
         IValidator<InfoTributariaRequest> infoTributariaValidator,
-        IValidator<DocSustentoRequest> docSustentoValidator)
+        IValidator<ImpuestoRetencionRequest> impuestoValidator)
     {
-        RuleFor(x => x.InfoCompRetencionRequest)
-            .NotNull().WithMessage("'InfoCompRetencionRequest' es obligatorio.")
+        RuleFor(x => x.InfoCompRetencion)
+            .NotNull().WithMessage("'InfoCompRetencion' es obligatorio.")
             .SetValidator(infoCompRetencionValidator);
 
         RuleFor(x => x.InfoTributariaRequest)
-            .NotNull().WithMessage("'InfoTributariaXml' es obligatorio.")
+            .NotNull().WithMessage("'InfoTributaria' es obligatorio.")
             .SetValidator(infoTributariaValidator);
 
-        RuleFor(x => x.DocsSustento)
+        RuleFor(x => x.Impuestos)
             .NotNull().WithMessage("'DocsSustento' es obligatorio.")
             .NotEmpty().WithMessage("Debe existir al menos un 'DocSustentoRequest'.");
 
-        RuleForEach(x => x.DocsSustento)
-            .SetValidator(docSustentoValidator);
-
-        // RuleForEach(x => x.InfoAdicional)
-        //     .SetValidator(new CampoAdicionalVali)
-        //     .When(x => x.InfoAdicional != null && x.InfoAdicional.Any());
+        RuleForEach(x => x.Impuestos)
+            .SetValidator(impuestoValidator);
     }
 }
 
-public class InfoCompRetencionValidator : Validator<InfoCompRetencionRequest>
+public class InfoCompRetencionValidator : Validator<InfoCompRetencion>
 {
     public InfoCompRetencionValidator()
     {
@@ -50,84 +47,65 @@ public class InfoCompRetencionValidator : Validator<InfoCompRetencionRequest>
             .NotEmpty().WithMessage("'FechaEmision' es obligatorio.")
             .LessThanOrEqualTo(DateTime.Today).WithMessage("'FechaEmision' no puede ser futura.");
 
-        RuleFor(x => x.TipoIdentificacionSujetoRetenido)
-            .NotEmpty().WithMessage("'TipoIdentificacionSujetoRetenido' es obligatorio.")
-            .MaximumLength(2);
-
-        RuleFor(x => x.RazonSocialSujetoRetenido)
-            .NotEmpty().WithMessage("'RazonSocialSujetoRetenido' es obligatorio.")
-            .MaximumLength(300);
-
-        RuleFor(x => x.IdentificacionSujetoRetenido)
-            .NotEmpty().WithMessage("'IdentificacionSujetoRetenido' es obligatorio.")
-            .MaximumLength(20);
-
-        RuleFor(x => x.PeriodoFiscal)
-            .NotEmpty().WithMessage("'PeriodoFiscal' es obligatorio.")
-            .Matches(@"^(0[1-9]|1[0-2])\/\d{4}$").WithMessage("'PeriodoFiscal' debe tener formato mm/yyyy.");
+        RuleFor(x => x.DirEstablecimiento).MaximumLength(300);
 
         RuleFor(x => x.ContribuyenteEspecial)
-            .Length(3, 13)
-            .When(x => !string.IsNullOrWhiteSpace(x.ContribuyenteEspecial));
+            .Length(3, 13).When(x => !string.IsNullOrWhiteSpace(x.ContribuyenteEspecial));
 
         RuleFor(x => x.ObligadoContabilidad)
-            .NotNull().WithMessage("'ObligadoContabilidad' es requerido cuando aplica.");
+            .NotNull()
+            .WithMessage("ObligadoContabilidad debe ser 'SI' o 'NO'.");
+
+        RuleFor(x => x.TipoIdentificacionSujetoRetenido)
+            .NotEmpty().Length(2).Matches(@"^\d{2}$");
+
+        RuleFor(x => x.RazonSocialSujetoRetenido).NotEmpty().MaximumLength(300);
+
+        RuleFor(x => x.IdentificacionSujetoRetenido).NotEmpty().MaximumLength(20);
+
+        RuleFor(x => x.PeriodoFiscal)
+            .NotEmpty()
+            .Must(ValidationHelpers.IsPeriod_MMyyyy)
+            .WithMessage("PeriodoFiscal debe tener formato MM/yyyy.");
     }
 }
 
-public class DocSustentoValidator : Validator<DocSustentoRequest>
+public class ImpuestoRetencionRequestValidator : AbstractValidator<ImpuestoRetencionRequest>
 {
-    public DocSustentoValidator(IValidator<ImpuestoDocSustentoRequest> impuestoValidator,
-        IValidator<RetencionDetalleRequest> retencionValidator, IValidator<PagoRequest> pagoValidator)
+    public ImpuestoRetencionRequestValidator()
     {
-        RuleFor(x => x.CodSustento)
-            .NotEmpty().WithMessage("'CodSustento' es obligatorio.");
+        RuleFor(x => x.Codigo).InclusiveBetween(1, 9);
+
+        RuleFor(x => x.CodigoRetencion)
+            .NotEmpty()
+            .MaximumLength(5); 
+
+        RuleFor(x => x.BaseImponible)
+            .NotNull()
+            .Must(d => ValidationHelpers.HasPrecisionAndScale(d, 14, 2))
+            .WithMessage("BaseImponible excede precisión/escala (max 14, 2 decimales).");
+
+        RuleFor(x => x.PorcentajeRetener)
+            .NotNull()
+            .Must(p => ValidationHelpers.HasPrecisionAndScale(p, 5, 2) || ValidationHelpers.HasPrecisionAndScale(p, 3, 0))
+            .WithMessage("PorcentajeRetener inválido (max 5 dig. y hasta 2 decimales).");
+
+        RuleFor(x => x.ValorRetenido)
+            .NotNull()
+            .Must(d => ValidationHelpers.HasPrecisionAndScale(d, 14, 2))
+            .WithMessage("ValorRetenido excede precisión/escala (max 14, 2 decimales).");
 
         RuleFor(x => x.CodDocSustento)
-            .NotEmpty().WithMessage("'CodDocSustento' es obligatorio.");
+            .NotEmpty()
+            .Length(2)
+            .Matches(@"^\d{2}$");
+
+        RuleFor(x => x.NumDocSustento)
+            .MaximumLength(15)
+            .Matches(@"^[0-9\-]*$").When(x => !string.IsNullOrWhiteSpace(x.NumDocSustento));
 
         RuleFor(x => x.FechaEmisionDocSustento)
-            .NotEmpty().WithMessage("'FechaEmisionDocSustento' es obligatorio.");
-
-        RuleFor(x => x.TotalSinImpuestos)
-            .InclusiveBetween(0, 999999999999.99M);
-
-        RuleFor(x => x.ImporteTotal)
-            .InclusiveBetween(0, 999999999999.99M);
-
-        RuleForEach(x => x.ImpuestosDocSustento).SetValidator(impuestoValidator);
-
-        RuleForEach(x => x.Retenciones).SetValidator(retencionValidator);
-
-        RuleForEach(x => x.Pagos).SetValidator(pagoValidator);
-
-        // if (reembolsoValidator != null)
-        // {
-        //     RuleFor(x => x.ReembolsoDetalleRequest).SetValidator(reembolsoValidator).When(x => x.ReembolsoDetalleRequest != null);
-        // }
-    }
-}
-
-public class ImpuestoDocSustentoValidator : Validator<ImpuestoDocSustentoRequest>
-{
-    public ImpuestoDocSustentoValidator()
-    {
-        RuleFor(x => x.CodImpuestoDocSustento).NotEmpty();
-        RuleFor(x => x.CodigoPorcentaje).NotEmpty();
-        RuleFor(x => x.BaseImponible).InclusiveBetween(0, 999999999999.99M);
-        RuleFor(x => x.Tarifa).InclusiveBetween(0, 9999.99M);
-        RuleFor(x => x.ValorImpuesto).InclusiveBetween(0, 999999999999.99M);
-    }
-}
-
-public class RetencionDetalleValidator : Validator<RetencionDetalleRequest>
-{
-    public RetencionDetalleValidator()
-    {
-        RuleFor(x => x.Codigo).NotEmpty();
-        RuleFor(x => x.CodigoRetencion).NotEmpty();
-        RuleFor(x => x.BaseImponible).InclusiveBetween(0, 999999999999.99M);
-        RuleFor(x => x.PorcentajeRetener).InclusiveBetween(0, 100M);
-        RuleFor(x => x.ValorRetenido).InclusiveBetween(0, 999999999999.99M);
+            .Must(d => string.IsNullOrWhiteSpace(d) || ValidationHelpers.IsDate_ddMMyyyy(d))
+            .WithMessage("FechaEmisionDocSustento debe tener formato dd/MM/yyyy si se envía.");
     }
 }

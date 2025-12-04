@@ -192,8 +192,8 @@ public class ImpuestoValidator : Validator<ImpuestoRequest>
 
         RuleFor(x => x.Tarifa)
             .NotNull().WithMessage("El campo 'Tarifa' es obligatorio.")
-            .InclusiveBetween(0.01M, 9999.99M)
-            .WithMessage("El campo 'Tarifa' debe estar entre 0.01 y 9999.99.");
+            .InclusiveBetween(0, 9999.99M)
+            .WithMessage("El campo 'Tarifa' debe estar entre 0 y 9999.99.");
 
         RuleFor(x => x.BaseImponible)
             .NotNull().WithMessage("El campo 'BaseImponible' es obligatorio.")

@@ -39,6 +39,16 @@ public static class ValidationHelpers
         return DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
             DateTimeStyles.None, out _);
     }
+    public static bool IsPeriod_MMyyyy(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return false;
+        }
+
+        return DateTime.TryParseExact("01/" + s, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out _);
+    }
 
     public static bool IsDigitsOnly(string s)
     {
