@@ -81,9 +81,9 @@ public class TotalImpuestoValidator : Validator<TotalImpuestoRequest>
             .WithMessage("El campo 'Codigo' solo puede tener los valores 2, 3 o 5.");
 
         RuleFor(x => x.CodigoPorcentaje)
-            .NotEmpty().WithMessage("El campo 'CodigoPorcentaje' es obligatorio.")
-            .InclusiveBetween(1, 9999)
-            .WithMessage("El campo 'CodigoPorcentaje' debe estar entre 1 y 9999.");
+            .NotNull().WithMessage("El campo 'CodigoPorcentaje' es obligatorio.")
+            .InclusiveBetween(0, 9999)
+            .WithMessage("El campo 'CodigoPorcentaje' debe estar entre 0 y 9999.");
 
         RuleFor(x => x.BaseImponible)
             .NotNull().WithMessage("El campo 'BaseImponible' es obligatorio.")
@@ -186,9 +186,9 @@ public class ImpuestoValidator : Validator<ImpuestoRequest>
             .WithMessage("El campo 'Codigo' solo puede tener los valores 2, 3 o 5.");
 
         RuleFor(x => x.CodigoPorcentaje)
-            .NotEmpty().WithMessage("El campo 'CodigoPorcentaje' es obligatorio.")
-            .InclusiveBetween(1, 9999)
-            .WithMessage("El campo 'CodigoPorcentaje' debe estar entre 1 y 9999.");
+            .NotNull().WithMessage("El campo 'CodigoPorcentaje' es obligatorio.")
+            .InclusiveBetween(0, 9999)
+            .WithMessage("El campo 'CodigoPorcentaje' debe estar entre 0 y 9999.");
 
         RuleFor(x => x.Tarifa)
             .NotNull().WithMessage("El campo 'Tarifa' es obligatorio.")

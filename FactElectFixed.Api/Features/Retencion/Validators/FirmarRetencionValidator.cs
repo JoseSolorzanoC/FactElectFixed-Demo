@@ -103,9 +103,8 @@ public class ImpuestoRetencionRequestValidator : AbstractValidator<ImpuestoReten
         RuleFor(x => x.NumDocSustento)
             .MaximumLength(15)
             .Matches(@"^[0-9\-]*$").When(x => !string.IsNullOrWhiteSpace(x.NumDocSustento));
-
+        
         RuleFor(x => x.FechaEmisionDocSustento)
-            .Must(d => string.IsNullOrWhiteSpace(d) || ValidationHelpers.IsDate_ddMMyyyy(d))
-            .WithMessage("FechaEmisionDocSustento debe tener formato dd/MM/yyyy si se envía.");
+            .LessThanOrEqualTo(DateTime.Today).WithMessage("'FechaEmisionDocSustento' no puede ser futura.");
     }
 }

@@ -109,5 +109,5 @@ public class ImpuestoRetencionRequest
     public decimal ValorRetenido { get; set; }
     public string CodDocSustento { get; set; } 
     public string NumDocSustento { get; set; } 
-    public string FechaEmisionDocSustento { get; set; } 
+    public DateTime FechaEmisionDocSustento { get; set; } 
 }

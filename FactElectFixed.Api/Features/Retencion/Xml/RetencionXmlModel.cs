@@ -83,6 +83,16 @@ public class ImpuestoRetencionXml
     [XmlElement("numDocSustento")]
     public string NumDocSustento { get; set; } 
     [XmlElement("fechaEmisionDocSustento")]
-    public string FechaEmisionDocSustento { get; set; } 
+    public string FechaEmisionDocSustentoString
+    {
+#pragma warning disable CA1305
+        get => FechaEmisionDocSustento.ToString("dd/MM/yyyy");
+#pragma warning restore CA1305
+#pragma warning disable S6580
+        set => FechaEmisionDocSustento = DateTime.ParseExact(value, "dd/MM/yyyy", null);
+#pragma warning restore S6580
+    }
+
+    [XmlIgnore] public DateTime FechaEmisionDocSustento { get; set; }
 }
 
