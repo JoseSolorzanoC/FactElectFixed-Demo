@@ -7,13 +7,13 @@
         <PackageVersion Include="FastEndpoints.Swagger" Version="7.0.1"/>
         <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0"/>
         <PackageVersion Include="Infoware.SRI.DocumentosElectronicos" Version="1.1.47"/>
-        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1"/>
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10"/>
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10"/>
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10"/>
+        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
+        <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0"/>
+        <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0"/>
+        <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0"/>
         <!--    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.6" />-->
         <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1-Preview.1"/>
-        <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0"/>
+        <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.0-rc.1.25458.5"/>
         <!--    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />-->
         <!--    <PackageVersion Include="Npgsql.OpenTelemetry" Version="9.0.3" />-->
         <PackageVersion Include="OpenTelemetry.Api" Version="1.12.0"/>
@@ -28,5 +28,7 @@
         <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.11.0.117924"/>
         <PackageVersion Include="FastEndpoints" Version="7.0.1"/>
         <PackageVersion Include="ZiggyCreatures.FusionCache" Version="2.4.0"/>
+        <PackageVersion Include="Microsoft.Build" Version="18.0.2"/>
+        <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12"/>
     </ItemGroup>
 </Project>

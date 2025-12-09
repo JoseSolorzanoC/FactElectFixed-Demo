@@ -126,7 +126,7 @@ public class FirmarDocumentoService(
 
             if (claveAcceso is not null)
             {
-                await Task.Delay(300);
+                await Task.Delay(2000);
 
                 return await VerificarDocumentoSri(claveAcceso, xmlFactura.OuterXml, firmarDocumentoRequest.Ambiente,
                     comprobantesAutorizadosResponse);
