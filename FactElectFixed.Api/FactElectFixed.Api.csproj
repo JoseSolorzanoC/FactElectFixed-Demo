@@ -46,4 +46,8 @@
         <PackageReference Include="SixLabors.ImageSharp"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Files\0993044733001\DocumentosAutorizados\" />
+    </ItemGroup>
+
 </Project>

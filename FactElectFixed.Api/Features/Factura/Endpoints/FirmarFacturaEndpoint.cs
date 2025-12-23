@@ -21,7 +21,7 @@ public class FirmarFacturaEndpoint(IFirmarDocumentoService documentoService)
         FirmarDocumentoRequest<FacturaRequest> req, CancellationToken ct)
     {
         FirmarDocumentoResponse enviarDocumentoSriResponse =
-            await documentoService.EnviarDocumentoSri<FacturaRequest, FacturaXmlModel>(req);
+            await documentoService.EnviarDocumentoSri<FacturaRequest, FacturaXmlModel>(req, ct);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }

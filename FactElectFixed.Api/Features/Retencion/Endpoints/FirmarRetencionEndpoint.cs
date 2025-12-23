@@ -21,7 +21,7 @@ public class FirmarRetencionEndpoint(IFirmarDocumentoService documentoService)
         FirmarDocumentoRequest<RetencionRequest> req, CancellationToken ct)
     {
         FirmarDocumentoResponse enviarDocumentoSriResponse =
-            await documentoService.EnviarDocumentoSri<RetencionRequest, RetencionXmlModel>(req);
+            await documentoService.EnviarDocumentoSri<RetencionRequest, RetencionXmlModel>(req, ct);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }

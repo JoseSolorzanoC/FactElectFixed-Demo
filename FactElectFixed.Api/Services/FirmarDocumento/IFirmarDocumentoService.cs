@@ -9,9 +9,10 @@ namespace FactElectFixed.Api.Services.FirmarDocumento;
 public interface IFirmarDocumentoService
 {
     Task<FirmarDocumentoResponse>
-        EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest)
+        EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest, CancellationToken cancellationToken = default)
         where TRequest : IDocumentoElectronicoBase<TXmlModel> where TXmlModel : class, IDocumentoXmlModel;
 
-    Task<FirmarDocumentoResponse> VerificarDocumentoSri(string claveAcceso, string xmlDocumentoFirmado,
-        EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados);
+    Task<FirmarDocumentoResponse> VerificarDocumentoSri(IEnumerable<string> clavesAcceso, string claveAccesoLote,
+        EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados,
+        CancellationToken cancellationToken = default);
 }

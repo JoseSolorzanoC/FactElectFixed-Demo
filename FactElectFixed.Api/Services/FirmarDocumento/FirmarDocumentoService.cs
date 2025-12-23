@@ -1,4 +1,6 @@
-﻿using System.Xml;
+﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Xml;
 using System.Xml.Linq;
 using FactElectFixed.Api.Database;
 using FactElectFixed.Api.Features.Configuracion.Entities;
@@ -29,7 +31,8 @@ public class FirmarDocumentoService(
     private ISRIWebService _sriWebService = sriWebService;
 
     public async Task<FirmarDocumentoResponse>
-        EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest)
+        EnviarDocumentoSri<TRequest, TXmlModel>(FirmarDocumentoRequest<TRequest> firmarDocumentoRequest,
+            CancellationToken cancellationToken = default)
         where TRequest : IDocumentoElectronicoBase<TXmlModel> where TXmlModel : class, IDocumentoXmlModel
     {
         try
@@ -37,10 +40,12 @@ public class FirmarDocumentoService(
             int indiceComprobante = 0;
 
             _sriWebService = _sriWebService.Using(firmarDocumentoRequest.Ambiente, EnumTipoEsquema.Offline);
-            Tuple<XmlDocument, List<TXmlModel>> tuplaSerializacion = await SerializarXml<TRequest, TXmlModel>(firmarDocumentoRequest);
+            Tuple<XmlDocument, List<TXmlModel>> tuplaSerializacion =
+                await SerializarXml<TRequest, TXmlModel>(firmarDocumentoRequest);
 
             XmlDocument xmlFactura = tuplaSerializacion.Item1;
             List<TXmlModel> comprobantesAutorizadosXml = tuplaSerializacion.Item2;
+
             var comprobantesAutorizadosResponse = new List<ComprobanteResponse>();
 
             foreach (TXmlModel _ in comprobantesAutorizadosXml)
@@ -112,24 +117,28 @@ public class FirmarDocumentoService(
                     if (mensajesSri.Any())
                     {
                         comprobante.Success = false;
-                        comprobante.ErroresAutorizacion = mensajesSri;
+                        comprobante.ErroresRecepcion = mensajesSri;
                     }
 
                     if (comprobantesAutorizadosResponse.All(c => c.ClaveAcceso != comprobante.ClaveAcceso))
                     {
                         comprobantesAutorizadosResponse.Add(comprobante);
                     }
-                    
+
                     indiceComprobante++;
+                    mensajesSri.Clear();
                 }
             }
 
             if (claveAcceso is not null)
             {
-                await Task.Delay(2000);
+                await Task.Delay(2000, cancellationToken);
 
-                return await VerificarDocumentoSri(claveAcceso, xmlFactura.OuterXml, firmarDocumentoRequest.Ambiente,
-                    comprobantesAutorizadosResponse);
+                return await VerificarDocumentoSri(
+                    [.. ExtraerComprobantesDesdeLote(xmlFactura.OuterXml).Select(extraido => extraido.ClaveAcceso)],
+                    claveAcceso,
+                    firmarDocumentoRequest.Ambiente,
+                    comprobantesAutorizadosResponse, cancellationToken);
             }
 
             return new FirmarDocumentoResponse
@@ -156,16 +165,26 @@ public class FirmarDocumentoService(
         }
     }
 
-    public async Task<FirmarDocumentoResponse> VerificarDocumentoSri(string claveAcceso, string xmlDocumentoFirmado,
-        EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados)
+    public async Task<FirmarDocumentoResponse> VerificarDocumentoSri(IEnumerable<string> clavesAcceso,
+        string claveAccesoLote,
+        EnumTipoAmbiente ambiente, List<ComprobanteResponse> comprobantesYaAutorizados,
+        CancellationToken cancellationToken = default)
     {
-        try
+        var comprobantesConcurrentBag = new ConcurrentBag<ComprobanteResponse>();
+        _sriWebService = _sriWebService.Using(ambiente, EnumTipoEsquema.Offline);
+
+        foreach (ComprobanteResponse c in comprobantesYaAutorizados)
         {
-            _sriWebService = _sriWebService.Using(ambiente, EnumTipoEsquema.Offline);
+            comprobantesConcurrentBag.Add(c);
+        }
+
+        var parallelOptions = new ParallelOptions
+            { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationToken };
+
+        await Parallel.ForEachAsync(clavesAcceso, parallelOptions, async (claveAcceso, token) =>
+        {
             Response<AutorizarComprobanteResponse.RespuestaAutorizacionComprobante> respuesta =
                 await _sriWebService.AutorizacionComprobanteAsync(claveAcceso);
-
-            var comprobantes = new List<ComprobanteResponse>(comprobantesYaAutorizados);
 
             if (respuesta is { Data.Autorizaciones.Autorizacion: not null })
             {
@@ -198,7 +217,7 @@ public class FirmarDocumentoService(
                         comprobante.ErroresAutorizacion = mensajesSri;
                     }
 
-                    comprobantes.Add(comprobante);
+                    comprobantesConcurrentBag.Add(comprobante);
 
                     if (comprobante is
                         { ClaveAcceso: not null, XmlProcesado: not null, EstadoAutorizacion: "AUTORIZADO" })
@@ -206,37 +225,32 @@ public class FirmarDocumentoService(
                         SafeXmlFileWriter.SaveXml(ConstruirRutaXml(comprobante.ClaveAcceso), comprobante.XmlProcesado);
                     }
                 }
-
-                return new FirmarDocumentoResponse
-                {
-                    Success = false,
-                    ClaveAcceso = claveAcceso,
-                    Comprobantes = comprobantes
-                };
             }
+        });
 
-            return new FirmarDocumentoResponse
-            {
-                Success = false,
-                ClaveAcceso = claveAcceso,
-                Comprobantes =
-                [
-                    .. ExtraerComprobantesDesdeLote(xmlDocumentoFirmado).Select(extraido => new ComprobanteResponse
-                    {
-                        Success = false,
-                        XmlProcesado = extraido.XmlCData,
-                        ClaveAcceso = extraido.ClaveAcceso,
-                        EstadoAutorizacion = "NO DEFINIDO",
-                        EstadoRecepcion = "RECIBIDA"
-                    })
-                ]
-            };
-        }
-        catch (Exception e)
+        return new FirmarDocumentoResponse
         {
-            Console.WriteLine(e);
-            throw;
-        }
+            Success = comprobantesConcurrentBag.ToList().TrueForAll(c => c.Success),
+            ClaveAcceso = claveAccesoLote,
+            Comprobantes = [.. comprobantesConcurrentBag]
+        };
+
+        // return new FirmarDocumentoResponse
+        // {
+        //     Success = false,
+        //     ClaveAcceso = "",
+        //     Comprobantes =
+        //     [
+        //         .. ExtraerComprobantesDesdeLote(xmlDocumentoFirmado).Select(extraido => new ComprobanteResponse
+        //         {
+        //             Success = false,
+        //             XmlProcesado = extraido.XmlCData,
+        //             ClaveAcceso = extraido.ClaveAcceso,
+        //             EstadoAutorizacion = "NO DEFINIDO",
+        //             EstadoRecepcion = "RECIBIDA"
+        //         })
+        //     ]
+        // };
     }
 
     private async Task<Tuple<XmlDocument, List<TXmlModel>>>
@@ -267,7 +281,8 @@ public class FirmarDocumentoService(
                 comprobantesYaAutorizados.Add(facturaXmlModel);
             }
 
-            claveAccesoPrimerComprobante ??= facturaXmlModel.InfoTributariaXml.ClaveAcceso;
+            claveAccesoPrimerComprobante ??=
+                ReemplazarCodigoNumericoClaveAcceso(facturaXmlModel.InfoTributariaXml.ClaveAcceso);
         }
 
         var lote = new XElement("lote",
@@ -414,5 +429,20 @@ public class FirmarDocumentoService(
         int endIndex = xml.IndexOf(endTag, StringComparison.Ordinal);
 
         return xml.Substring(startIndex, endIndex - startIndex);
+    }
+
+    private static string ReemplazarCodigoNumericoClaveAcceso(string claveAcceso)
+    {
+        const int startIndex = 36; // índice donde inicia 75160120
+        const int length = 8;
+
+#pragma warning disable CA1305
+        string randomNumber = RandomNumberGenerator
+            .GetInt32(0, 100_000_000)
+            .ToString("D8");
+#pragma warning restore CA1305
+
+        return claveAcceso.Remove(startIndex, length)
+            .Insert(startIndex, randomNumber);
     }
 }

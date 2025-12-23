@@ -21,7 +21,7 @@ public class FirmarNotaCreditoEndpoint(IFirmarDocumentoService documentoService)
         FirmarDocumentoRequest<NotaCreditoRequest> req, CancellationToken ct)
     {
         FirmarDocumentoResponse enviarDocumentoSriResponse =
-            await documentoService.EnviarDocumentoSri<NotaCreditoRequest, NotaCreditoXmlModel>(req);
+            await documentoService.EnviarDocumentoSri<NotaCreditoRequest, NotaCreditoXmlModel>(req, ct);
         return TypedResults.Ok(enviarDocumentoSriResponse);
     }
 }
